@@ -33,15 +33,15 @@ Periodically (how? via scheduler? while loop? etc...see below)
   - Send match to be run by saturn, via pubsub
 - For each match in backend db that is associated with a relevant tour round, and which is completed:
   - Report it to challonge via api (https://api.challonge.com/v1/documents/matches/update)
-- For each match as above that tried to run but failed cuz Saturn
-  - Ask to retry
+- For each match as above that tried to run but is declared as Error by Saturn..
+  - IDK. human intervention, and introduce a way to rerun the match and all, while still hooking up well to tournament
 - Rinse wash repeat til tour is done
 
 Then the next step ...
 
 - Create a public bracket on challonge.
 - As matches are streamed (or pre-released), publish matches/rounds to that challonge bracket.
-  - Is easiest via some bulk buttons on admin interface. I think this needs to be impld.
+  - Is easiest via some bulk buttons on admin interface. See backend/siarnaq/api/episodes/models.py / TournamentRound.release_status, which will release in bulk by round
 
 After stream...
 
@@ -59,6 +59,7 @@ TODO I'm missing some details about round visibility on backend server
 - If done stupidly, backend server could be frozen in a sad while loop
 - Scheduler to auto-start tournaments?
 - Scheduler to auto-query an endpoint, to keep the tournament running?
+- Run each round at a time. (proposed solution for now!)
 
 ## Work concerns
 
