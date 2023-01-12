@@ -8,13 +8,14 @@
 # and also kill flow of tour run
 
 import json
-
+import os
 import requests
 
 _headers = {
     "Accept": "application/json",
     "Authorization-Type": "v1",
-    "Authorization": None,
+    # TODO refactor this into normal settings var etc
+    "Authorization": os.getenv("CHALLONGE_API_KEY"),
     "Content-Type": "application/vnd.api+json",
     # requests' default user agent causes Challonge's API to crash.
     "User-Agent": "",

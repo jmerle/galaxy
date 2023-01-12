@@ -48,16 +48,14 @@ def initialize(tour_url, tour_name, is_single_elim):
 
 # Sandbox testing
 if __name__ == "__main__":
-    CHALLONGE_API_KEY = os.getenv("CHALLONGE_API_KEY")
-    auth(CHALLONGE_API_KEY)
-
     IS_SINGLE_ELIM = True
 
-    key = str(random.randint(1, 10000))
+    # key = str(random.randint(1, 10000))
+    key = 9063
 
     tour_name = "Test Tour" + key
     tour_name_private = tour_name + "_private"
     tour_url = f"bc_test_tour_{key}"
     tour_url_private = f"{tour_url}_private"
 
-    initialize(tour_url_private, tour_name_private, IS_SINGLE_ELIM)
+    # initialize(tour_url_private, tour_name_private, IS_SINGLE_ELIM)
