@@ -9,7 +9,7 @@ import challonge
 
 # Then user presses a button to "initialize it"
 
-participants = [str(i + 1) for i in range(6)]  # 1-idx
+participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
 
 
 # TODO Challonge might drop v1 auth soon. Hopefully not during January!
@@ -22,6 +22,7 @@ def auth(api_key):
 
 def initialize(tour_url, tour_name, is_single_elim):
     challonge.create_tour(tour_url, tour_name, True, is_single_elim)
+    challonge.bulk_add_participants(tour_name_private, participants)
 
 
 # Sandbox testing

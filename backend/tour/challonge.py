@@ -21,6 +21,7 @@ _headers = {
 }
 
 AUTH_TYPE = "v1"
+URL_BASE = "https://api.challonge.com/v2/"
 
 
 def set_api_key(api_key):
@@ -31,7 +32,7 @@ def set_api_key(api_key):
 def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
     tournament_type = "single elimination" if is_single_elim else "double elimination"
 
-    url = "https://api.challonge.com/v2/tournaments.json"
+    url = f"{URL_BASE}tournaments.json"
 
     data = json.dumps(
         {
@@ -48,4 +49,30 @@ def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
     )
 
     r = requests.post(url, headers=_headers, data=data)
-    print(r.content)
+    print(r.status_code)
+
+
+# Assumes a list of names of participants, ordered by seed,
+# better participant (ie seed #1) first.
+def bulk_add_participants(tour_url, participants):
+    url = f"{URL_BASE}tournaments/{tour_url}/participants/bulk_add.json"
+
+    # Format into what Challonge API wants
+    # make sure to change from 0-idx to 1-idx
+    participants_formatted = [
+        {"name": name, "seed": idx + 1} for (idx, name) in enumerate(participants)
+    ]
+
+    data = json.dumps(
+        {
+            "data": {
+                "type": "Participant",
+                "attributes": {
+                    "participants": participants_formatted,
+                },
+            }
+        }
+    )
+
+    r = requests.post(url, headers=_headers, data=data)
+    print(r.status_code)
