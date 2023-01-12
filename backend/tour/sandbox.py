@@ -23,6 +23,7 @@ def auth(api_key):
 def initialize(tour_url, tour_name, is_single_elim):
     challonge.create_tour(tour_url, tour_name, True, is_single_elim)
     challonge.bulk_add_participants(tour_url, participants)
+    challonge.start_tour(tour_url)
 
 
 # Sandbox testing

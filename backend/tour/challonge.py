@@ -76,3 +76,14 @@ def bulk_add_participants(tour_url, participants):
 
     r = requests.post(url, headers=_headers, data=data)
     print(r.status_code)
+
+
+def start_tour(tour_url):
+    url = f"{URL_BASE}tournaments/{tour_url}/change_state.json"
+
+    data = json.dumps(
+        {"data": {"type": "TournamentState", "attributes": {"state": "start"}}}
+    )
+
+    r = requests.put(url, headers=_headers, data=data)
+    print(r.status_code)
