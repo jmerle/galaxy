@@ -22,7 +22,7 @@ def auth(api_key):
 
 def initialize(tour_url, tour_name, is_single_elim):
     challonge.create_tour(tour_url, tour_name, True, is_single_elim)
-    challonge.bulk_add_participants(tour_name_private, participants)
+    challonge.bulk_add_participants(tour_url, participants)
 
 
 # Sandbox testing
@@ -32,7 +32,11 @@ if __name__ == "__main__":
 
     IS_SINGLE_ELIM = True
 
-    tour_name = "tour_name_test" + str(random.randint(1, 10000))
-    tour_name_private = tour_name + "_private"
+    key = str(random.randint(1, 10000))
 
-    initialize(tour_name_private, tour_name_private, IS_SINGLE_ELIM)
+    tour_name = "Test Tour" + key
+    tour_name_private = tour_name + "_private"
+    tour_url = f"bc_test_tour_{key}"
+    tour_url_private = f"{tour_url}_private"
+
+    initialize(tour_url_private, tour_name_private, IS_SINGLE_ELIM)
