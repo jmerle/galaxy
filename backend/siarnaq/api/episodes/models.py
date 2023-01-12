@@ -280,12 +280,50 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name_short
 
+    # TODO rename this method?
     def seed_by_scrimmage(self):
         """
-        Seed the tournament with eligible teamsn in order of decreasing rating, and
+        Seed the tournament with eligible teams in order of decreasing rating, and
         populate the Challonge brackets.
         """
-        raise NotImplementedError
+
+        key = str(random.randint(1, 10000))
+        # key = 9063
+
+        # TODO rename vars in accordance with model field names
+        tour_name = "Test Tour" + key
+        tour_name_private = tour_name + "_private"
+        tour_url = f"bc_test_tour_{key}"
+        tour_url_private = f"{tour_url}_private"
+
+        # TODO support double
+        is_single_elim = True
+        # TODO proper pull
+        participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
+
+        challonge.create_tour(tour_url, tour_name, True, is_single_elim)
+        challonge.bulk_add_participants(tour_url, participants)
+        challonge.start_tour(tour_url)
+
+        tour = json.loads(challonge.get_tour(tour_url))
+        # Derive rounds
+        # Takes some wrangling with API response format
+        rounds = set()
+        for item in tour["included"]:
+            if item["type"] == "match":
+                round_idx = item["attributes"]["round"]
+                if round_idx not in rounds:
+                    rounds.add(round_idx)
+        
+        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx) for round_idx in rounds]
+        print(round_objects)
+        TournamentRound.objects.bulk_create(round_objects)
+
+        self.challonge_id_private = tour_url_private
+        self.challonge_id_public = tour_url
+        self.save()
+
+
 
     def start_progress(self):
         """Start or resume the tournament."""

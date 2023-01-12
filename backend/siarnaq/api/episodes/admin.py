@@ -1,3 +1,4 @@
+import structlog
 from django.contrib import admin
 
 from siarnaq.api.compete.models import Match
@@ -9,6 +10,7 @@ from siarnaq.api.episodes.models import (
     TournamentRound,
 )
 
+logger = structlog.get_logger(__name__)
 
 class MapInline(admin.TabularInline):
     model = Map
@@ -107,9 +109,17 @@ class TournamentRoundInline(admin.TabularInline):
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("maps")
 
+@admin.action(description="create_challonge TODO improve")
+def create_challonge(modeladmin, request, queryset):
+    logger.info("create_challonge", message="TODO")
+    print(queryset)
+    for tour in queryset:
+        tour.seed_by_scrimmage()
+
 
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
+    actions = [create_challonge]
     fieldsets = (
         (
             "General",
@@ -134,7 +144,7 @@ class TournamentAdmin(admin.ModelAdmin):
         (
             "Challonge configuration",
             {
-                "fields": ("challonge_private", "challonge_public", "in_progress"),
+                "fields": ("challonge_id_private", "challonge_id_public", "in_progress"),
             },
         ),
     )
@@ -151,7 +161,7 @@ class TournamentAdmin(admin.ModelAdmin):
     list_filter = ("episode",)
     list_select_related = ("episode",)
     ordering = ("-episode__game_release", "-submission_freeze")
-    readonly_fields = ("in_progress",)
+    # readonly_fields = ("in_progress",)
     search_fields = ("name_short", "name_long")
     search_help_text = "Search for a full or abbreviated name."
 
