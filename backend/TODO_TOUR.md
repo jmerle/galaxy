@@ -26,7 +26,7 @@
 
 Periodically (how? via scheduler? while loop? etc...see below)
 
-- Backend hits challonge map list
+- Backend hits challonge match list
 - For each api match whose state (on api) is "open"...
   - (TODO NEED TO ENSURE THAT MULTIPLE BACKENDS DONT ACT ON SAME MATCH)
   - Create match in backend db. Associate it with the proper tour and tour round!!!
