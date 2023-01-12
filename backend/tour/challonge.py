@@ -1,3 +1,12 @@
+# An API-esque module for our usage.
+# Commands here are not very generic (like a good API),
+# and are instead tailored to Battlecode's specific usage,
+# to improve dev efficiency
+
+# TODO in every method with an api call,
+# catch exceptions and throw a new exception if necessary,
+# and also kill flow of tour run
+
 import json
 
 import requests
