@@ -259,6 +259,16 @@ class Tournament(models.Model):
     in_progress = models.BooleanField(default=False)
     """Whether the tournament is currently being run on the Saturn compute cluster."""
 
+    challonge_id_private = models.SlugField()
+    # TODO doc
+
+    challonge_id_public = models.SlugField()
+    # TODO doc
+
+    # TODO consider dropping the URLField's,
+    # as they can be uniquely derived from the IDs anyways
+    # Is it worth the migration?
+
     challonge_private = models.URLField(null=True, blank=True)
     """A private Challonge bracket showing matches in progress as they are run."""
 
@@ -314,6 +324,8 @@ class TournamentRound(models.Model):
     )
     """The tournament to which this round belongs."""
 
+    # TODO consider renaming this as "challonge_round_number"
+    # is it worth the migration?
     challonge_id = models.SmallIntegerField(null=True, blank=True)
     """The ID of this round as referenced by Challonge."""
 
