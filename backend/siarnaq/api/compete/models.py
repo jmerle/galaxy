@@ -213,6 +213,9 @@ class Match(SaturnInvocation):
     replay = models.UUIDField(default=uuid.uuid4)
     """The replay file of this match."""
 
+    challonge_id = models.IntegerField(blank=True, null=True)
+    # TODO doc
+
     objects = MatchQuerySet.as_manager()
 
     def __str__(self):

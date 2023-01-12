@@ -259,10 +259,10 @@ class Tournament(models.Model):
     in_progress = models.BooleanField(default=False)
     """Whether the tournament is currently being run on the Saturn compute cluster."""
 
-    challonge_id_private = models.SlugField()
+    challonge_id_private = models.SlugField(null=True, blank=True)
     # TODO doc
 
-    challonge_id_public = models.SlugField()
+    challonge_id_public = models.SlugField(null=True, blank=True)
     # TODO doc
 
     # TODO consider dropping the URLField's,
