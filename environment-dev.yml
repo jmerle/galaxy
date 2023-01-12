@@ -40,3 +40,4 @@ dependencies:
     - djangorestframework-simplejwt==5.2.2
     - google-cloud-scheduler==2.7.3
     - requests==2.28.1
+    - types-requests==2.28.11.7
