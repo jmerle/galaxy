@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+import json
 import os
 import random
 
@@ -24,6 +25,25 @@ def initialize(tour_url, tour_name, is_single_elim):
     challonge.create_tour(tour_url, tour_name, True, is_single_elim)
     challonge.bulk_add_participants(tour_url, participants)
     challonge.start_tour(tour_url)
+
+    tour = json.loads(challonge.get_tour(tour_url))
+
+    # Derive rounds
+    # Takes some wrangling with API response format
+    rounds = set()
+    for item in tour["included"]:
+        if item["type"] == "match":
+            round = item["attributes"]["round"]
+            if round not in rounds:
+                rounds.add(round)
+    print(rounds)
+    # TODO auto-create tournament rounds in the backend.
+    # Make sure to assign the tournament and round number
+    # TODO not entirely sure what order to set them in
+    # (for double-elim)
+
+    # TODO backend should set tournament status to something like "initialized"
+    # and now wait for maps to be assigned
 
 
 # Sandbox testing

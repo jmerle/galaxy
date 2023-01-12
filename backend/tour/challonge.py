@@ -87,3 +87,11 @@ def start_tour(tour_url):
 
     r = requests.put(url, headers=_headers, data=data)
     print(r.status_code)
+
+
+def get_tour(tour_url):
+    url = f"{URL_BASE}tournaments/{tour_url}.json"
+
+    r = requests.get(url, headers=_headers)
+    print(r.status_code)
+    return r.content
