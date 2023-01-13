@@ -205,7 +205,7 @@ class Match(SaturnInvocation):
     """The maps to be played in this match."""
 
     alternate_order = models.BooleanField()
-    """Whether players should alternate orderGbetween successive games of this match."""
+    """Whether players should alternate order between successive games of this match."""
 
     is_ranked = models.BooleanField()
     """Whether this match counts for ranked ratings."""
