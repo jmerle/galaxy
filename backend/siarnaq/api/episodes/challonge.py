@@ -55,18 +55,12 @@ def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
 def bulk_add_participants(tour_url, participants):
     url = f"{URL_BASE}tournaments/{tour_url}/participants/bulk_add.json"
 
-    # Format into what Challonge API wants
-    # make sure to change from 0-idx to 1-idx
-    participants_formatted = [
-        {"name": name, "seed": idx + 1} for (idx, name) in enumerate(participants)
-    ]
-
     data = json.dumps(
         {
             "data": {
                 "type": "Participant",
                 "attributes": {
-                    "participants": participants_formatted,
+                    "participants": participants,
                 },
             }
         }

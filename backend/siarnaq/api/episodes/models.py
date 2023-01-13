@@ -316,12 +316,22 @@ class Tournament(models.Model):
         # TODO support double
         is_single_elim = True
         participants = self.get_potential_participants()
-        participants_names = [p.name for p in participants]
+        # Parse into a format Challonge enjoys
+        # 1-idx seed
+        # Store team id in misc, for convenience (re-looking up is annoying)
+        # Store tour submission in misc, for consistency and convenience
+        # Note that tour submission should never change during a tournament anyways
+        # due to submission freeze. Bad things might happen if it does tho
+        participants = [
+            {"name": p.name, "seed": idx + 1, "misc": f"{p.id},{p.active_submission}"}
+            for (idx, p) in enumerate(participants)
+        ]
+        print(participants)
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
         challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
-        challonge.bulk_add_participants(tour_id_private, participants_names)
+        challonge.bulk_add_participants(tour_id_private, participants)
         challonge.start_tour(tour_id_private)
 
         tour = json.loads(challonge.get_tour(tour_id_private))
