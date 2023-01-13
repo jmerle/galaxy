@@ -7,35 +7,29 @@
 - ideally just hit the admin panel for all the things
 - Use challonge as much as possible to do bracket stuffs. pls no reinvent wheel T_T
 
-## Code outline
+## Code TODOs
 
-- user creates a tour, with blank challonge links, and "in progress" is false
-- user presses a button on admin panel to "initialize" it
 - Backend finds that this tour has blank challonge links yet "in progress", and initializes it:
-  - Creates 1 new tournament, **private** https://api.challonge.com/v1/documents/tournaments/create
   - Adds the participants to challonge
-    - Derive them via eligibility criteria
-    - Put them to challonge via https://api.challonge.com/v1/documents/participants/bulk_add
-  - Adds rounds (at least w partial info? idk) to BC backend
-    - Make sure rounds have descriptive names, eg "tourname-r1-winners" or smth
-    - So this is hard, cuz rounds aren't directly exposed by challonge API. Perhaps best is to get the matchlist (https://api.challonge.com/v1/documents/matches/index) and then iterate through all of them and find distinct rounds.
+    - Derive them via eligibility criteria properly
+  - Adds rounds to BC backend
     - For double elim, challonge API numbers rounds really strangely. We can deal with it tho; just need some manual labor
-- User assigns maps to those rounds via admin panel
-  - IDK, this seems likes the best way to set maps, without high effort. Yay admin panel! Also this order guarantees that
-- User clicks some button to begin. Perhaps switch the backend tour to "in progress" here
 
 Periodically (how? via scheduler? while loop? etc...see below)
 
-- Backend hits challonge match list
-- For each api match whose state (on api) is "open"...
-  - (TODO NEED TO ENSURE THAT MULTIPLE BACKENDS DONT ACT ON SAME MATCH)
-  - Create match in backend db. Associate it with the proper tour and tour round!!!
-  - Send match to be run by saturn, via pubsub
-- For each match in backend db that is associated with a relevant tour round, and which is completed:
-  - Report it to challonge via api (https://api.challonge.com/v1/documents/matches/update)
-- For each match as above that tried to run but is declared as Error by Saturn..
-  - IDK. human intervention, and introduce a way to rerun the match and all, while still hooking up well to tournament
+- User asks for a round to be done:
+  - Backend hits challonge match list
+  - For each api match whose state (on api) is "open"...
+    - Create match in backend db. Associate it with the proper tour and tour round!!!
+    - Send match to be run by saturn, via pubsub
+  - For each match in backend db that is associated with a relevant tour round, and which is completed:
+    - Report it to challonge via api (https://api.challonge.com/v1/documents/matches/update)
+  - For each match as above that tried to run but is declared as Error by Saturn..
+    - Re-run the entire round. (later it'd be nice to re-run just a match but)
+- If needed, user can bulk restart a round
+  - Clear round and any future dependencies
 - Rinse wash repeat til tour is done
+- Create the tour-result json expected by client, and provide to admin (how?)
 
 Then the next step ...
 
@@ -47,21 +41,11 @@ After stream...
 
 - Change tour things to allow tour matches to be shown in dashboard
 
-TODO I'm missing some details about round visibility on backend server
+## GitHub / Code Ops TODOs
 
-## Architecture Concerns
-
-- "In progress?" isn't as robust as I'd like. maybe need an enum of a few things
-
-  - uninitialized / initialized / in progress / etc
-
-- Many backend servers exist and run, hence concurrency issues etc
-- If done stupidly, backend server could be frozen in a sad while loop
-- Scheduler to auto-start tournaments?
-- Scheduler to auto-query an endpoint, to keep the tournament running?
-- Run each round at a time. (proposed solution for now!)
-
-## Work concerns
-
-- Nathan knows how to do all the challonge stuff; it's kinda c-p from years prior.
-- Nathan does not know our backend code well enough. He can struggle through it, but might be better to get a hard carry from someone else. Esp for design decisions.
+- TEST TEST TEST
+- Finalize and create back-\_in_compatible migrations, and release them on staging (and in prod later)
+- File a new issue for double-elim tours (and other refinements)
+- Port this TODO doc into GH issues
+- A fun TODO is to run everything all in one go, ie not have to wait round-by-round. This takes care for concurrency issues / queueing the same match multiple times.
+  - The best idea would be to, when a match is done, query for matches that are newly "open" and have not yet been already entered in DB and fired off to scrim servers. But, you'd have to make sure that two servers don't see the same newly open things and queue them both. Perhaps this is work-aroundable via locking.
