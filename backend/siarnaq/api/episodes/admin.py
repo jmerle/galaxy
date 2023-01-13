@@ -104,22 +104,21 @@ class TournamentRoundInline(admin.TabularInline):
     fields = ("name", "maps", "challonge_id", "release_status")
     ordering = ("challonge_id",)
     raw_id_fields = ("maps",)
-    # readonly_fields = ("challonge_id",)
+    readonly_fields = ("challonge_id",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("maps")
 
-@admin.action(description="create_challonge TODO improve")
-def create_challonge(modeladmin, request, queryset):
-    logger.info("create_challonge", message="TODO")
-    print(queryset)
+@admin.action(description="Initialize a tournament")
+def initialize(modeladmin, request, queryset):
+    logger.info("initialize", message=f"Initializing tournaments in {queryset}")
     for tour in queryset:
-        tour.seed_by_scrimmage()
+        tour.initialize()
 
 
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
-    actions = [create_challonge]
+    actions = [initialize]
     fieldsets = (
         (
             "General",
@@ -161,7 +160,7 @@ class TournamentAdmin(admin.ModelAdmin):
     list_filter = ("episode",)
     list_select_related = ("episode",)
     ordering = ("-episode__game_release", "-submission_freeze")
-    # readonly_fields = ("in_progress",)
+    readonly_fields = ("in_progress",)
     search_fields = ("name_short", "name_long")
     search_help_text = "Search for a full or abbreviated name."
 
@@ -185,8 +184,7 @@ class MatchInline(admin.TabularInline):
 
 @admin.action(description="Create and enqueue matches of a tournament round")
 def enqueue(modeladmin, request, queryset):
-    logger.info("task_requeue", message="TODO")
-    print(queryset)
+    logger.info("enqueue", message=f"Enqueueing tournament rounds {queryset}")
     for round in queryset:
         round.enqueue()
 

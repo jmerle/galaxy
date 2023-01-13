@@ -3,10 +3,6 @@
 # and are instead tailored to Battlecode's specific usage,
 # to improve dev efficiency
 
-# TODO in every method with an api call,
-# catch exceptions and throw a new exception if necessary,
-# and also kill flow of tour run
-
 import json
 import os
 import requests
@@ -50,8 +46,7 @@ def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
     )
 
     r = requests.post(url, headers=_headers, data=data)
-    print(r.status_code)
-
+    r.raise_for_status()
 
 # Assumes a list of names of participants, ordered by seed,
 # better participant (ie seed #1) first.
@@ -76,7 +71,7 @@ def bulk_add_participants(tour_url, participants):
     )
 
     r = requests.post(url, headers=_headers, data=data)
-    print(r.status_code)
+    r.raise_for_status()
 
 
 def start_tour(tour_url):
@@ -87,12 +82,12 @@ def start_tour(tour_url):
     )
 
     r = requests.put(url, headers=_headers, data=data)
-    print(r.status_code)
+    r.raise_for_status()
 
 
 def get_tour(tour_url):
     url = f"{URL_BASE}tournaments/{tour_url}.json"
 
     r = requests.get(url, headers=_headers)
-    print(r.status_code)
+    r.raise_for_status()
     return r.content

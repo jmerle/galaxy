@@ -214,7 +214,10 @@ class Match(SaturnInvocation):
     """The replay file of this match."""
 
     challonge_id = models.IntegerField(blank=True, null=True)
-    # TODO doc
+    """If this match is referenced in a private Challonge bracket,
+    Challonge's id of the match in the bracket."""
+    # TODO what happens if multiple matches in siarnaq have the same challonge_id?
+    # is this scary, especially when re-doing rounds? I'll find out...
 
     objects = MatchQuerySet.as_manager()
 

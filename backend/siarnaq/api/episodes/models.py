@@ -266,14 +266,12 @@ class Tournament(models.Model):
     """Whether the tournament is currently being run on the Saturn compute cluster."""
 
     challonge_id_private = models.SlugField(null=True, blank=True)
-    # TODO doc
+    """The Challonge ID of the associated private bracket."""
 
     challonge_id_public = models.SlugField(null=True, blank=True)
-    # TODO doc
+    """The Challonge ID of the associated private bracket."""
 
-    # TODO consider dropping the URLField's,
-    # as they can be uniquely derived from the IDs anyways
-    # Is it worth the migration?
+    # TODO drop the following two fields when ready to make incompatible migrations
 
     challonge_private = models.URLField(null=True, blank=True)
     """A private Challonge bracket showing matches in progress as they are run."""
@@ -286,21 +284,23 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name_short
 
-    # TODO rename this method?
-    def seed_by_scrimmage(self):
+    def initialize(self):
         """
-        Seed the tournament with eligible teams in order of decreasing rating, and
-        populate the Challonge brackets.
+        Seed the tournament with eligible teams in order of decreasing rating,
+        populate the Challonge brackets, and create TournamentRounds.
         """
-
-        key = str(random.randint(1, 10000))
-        # key = 9063
 
         # TODO rename vars in accordance with model field names
-        tour_name_public = "Test Tour" + key
-        tour_name_private = tour_name_public + "_private"
-        tour_url_public = f"bc_test_tour_{key}"
-        tour_url_private = f"{tour_url_public}_private"
+        tour_name_public = f"{self.episode.name_long} {self.name_long}"
+        tour_name_private = tour_name_public + " (private)"
+
+        # For security by obfuscation, 
+        # and to allow easy regeneration of bracket
+        key = random.randint(1000, 9999)
+        # Challonge does not allow hyphens in its IDs
+        # so substitute them just in case
+        tour_id_public = (f"{self.episode.name_short}_{self.name_short}_{key}").replace("-", "_")
+        tour_id_private = f"{tour_id_public}_private"
 
         # TODO support double
         is_single_elim = True
@@ -309,13 +309,14 @@ class Tournament(models.Model):
 
         # First bracket made should be private, 
         # to hide results and enable fixing accidents
-        challonge.create_tour(tour_url_private, tour_name_private, True, is_single_elim)
-        challonge.bulk_add_participants(tour_url_private, participants)
-        challonge.start_tour(tour_url_private)
+        challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
+        challonge.bulk_add_participants(tour_id_private, participants)
+        challonge.start_tour(tour_id_private)
 
-        tour = json.loads(challonge.get_tour(tour_url_private))
-        # Derive rounds
+        tour = json.loads(challonge.get_tour(tour_id_private))
+        # Derive round IDs
         # Takes some wrangling with API response format
+        # TODO move this block to challonge.py
         rounds = set()
         for item in tour["included"]:
             if item["type"] == "match":
@@ -323,12 +324,14 @@ class Tournament(models.Model):
                 if round_idx not in rounds:
                     rounds.add(round_idx)
         
-        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx, name=f"{tour_name_private} Round {round_idx}") for round_idx in rounds]
+        # TODO check and tweak iter order in double elim
+        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx, 
+        name=f"{tour_name_private} Round {round_idx}") for round_idx in rounds]
         print(round_objects)
         TournamentRound.objects.bulk_create(round_objects)
 
-        self.challonge_id_private = tour_url_private
-        self.challonge_id_public = tour_url_public
+        self.challonge_id_private = tour_id_private
+        self.challonge_id_public = tour_id_public
         self.save()
 
 
@@ -371,7 +374,7 @@ class TournamentRound(models.Model):
     """The tournament to which this round belongs."""
 
     # TODO consider renaming this as "challonge_round_number"
-    # is it worth the migration?
+    # Should only do this when ready to run back-incompatible migrations
     challonge_id = models.SmallIntegerField(null=True, blank=True)
     """The ID of this round as referenced by Challonge."""
 
@@ -398,7 +401,8 @@ class TournamentRound(models.Model):
         return f"{self.tournament} ({self.name})"
 
     def enqueue(self):
-        """TODO"""
+        """Creates and enqueues all matches for this round.
+        Fails if this round is already in progress."""
 
         tour = json.loads(challonge.get_tour(self.tournament.challonge_id_private))
         # Derive matches of this round
@@ -417,7 +421,7 @@ class TournamentRound(models.Model):
 
         print(len(matches))
 
-        match_objects = [Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = matches["id"]) for m in matches]
+        match_objects = [Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = m["id"]) for m in matches]
         print(match_objects)
         matches = Match.objects.bulk_create(match_objects)
         matches.enqueue()
