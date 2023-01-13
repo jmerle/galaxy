@@ -389,6 +389,8 @@ class TournamentRound(models.Model):
     )
     """The tournament to which this round belongs."""
 
+    # TODO consider renaming this as "challonge_round_number"
+    # Should only do this when ready to run back-incompatible migrations
     challonge_id = models.SmallIntegerField(null=True, blank=True)
     """The ID of this round as referenced by Challonge."""
 
@@ -413,3 +415,23 @@ class TournamentRound(models.Model):
 
     def __str__(self):
         return f"{self.tournament} ({self.name})"
+
+    def enqueue(self):
+        """Creates and enqueues all matches for this round.
+        Fails if this round is already in progress."""
+
+        tour = json.loads(challonge.get_tour(self.tournament.challonge_id_private))
+        # Derive matches of this round
+        matches = []
+        # kes some wrangling with API response format
+        for item in tour["included"]:
+            if item["type"] == "match":
+                round_idx = item["attributes"]["round"]
+                if round_idx == self.challonge_id:
+                    # Only enqueue the round if all matches are ready and open.
+                    # TODO create a force-requeue,
+                    # which allows for open, but not pending
+                    if item["attributes"]["state"] in ("open", "pending"):
+                        # TODO return some sort of 400
+                        raise Exception
+                    matches.add(item)

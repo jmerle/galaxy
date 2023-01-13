@@ -189,8 +189,16 @@ class MatchInline(admin.TabularInline):
         return False
 
 
+@admin.action(description="Create and enqueue matches of a tournament round")
+def enqueue(modeladmin, request, queryset):
+    logger.info("enqueue", message=f"Enqueueing tournament rounds {queryset}")
+    for round in queryset:
+        round.enqueue()
+
+
 @admin.register(TournamentRound)
 class TournamentRoundAdmin(admin.ModelAdmin):
+    actions = [enqueue]
     fields = (
         "name",
         "tournament",

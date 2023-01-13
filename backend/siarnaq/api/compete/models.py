@@ -205,13 +205,19 @@ class Match(SaturnInvocation):
     """The maps to be played in this match."""
 
     alternate_order = models.BooleanField()
-    """Whether players should alternate orderGbetween successive games of this match."""
+    """Whether players should alternate order between successive games of this match."""
 
     is_ranked = models.BooleanField()
     """Whether this match counts for ranked ratings."""
 
     replay = models.UUIDField(default=uuid.uuid4)
     """The replay file of this match."""
+
+    challonge_id = models.IntegerField(blank=True, null=True)
+    """If this match is referenced in a private Challonge bracket,
+    Challonge's id of the match in the bracket."""
+    # TODO what happens if multiple matches in siarnaq have the same challonge_id?
+    # is this scary, especially when re-doing rounds? I'll find out...
 
     objects = MatchQuerySet.as_manager()
 
