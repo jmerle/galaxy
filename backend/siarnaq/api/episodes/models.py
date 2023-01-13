@@ -7,7 +7,7 @@ from sortedm2m.fields import SortedManyToManyField
 from siarnaq.api.episodes.managers import EpisodeQuerySet, TournamentQuerySet
 
 # TODO is there a better import format?
-from siarnaq.api.compete.models import Match 
+from siarnaq.api.compete.models import Match
 from siarnaq.api.episodes import challonge
 import json
 import random
@@ -294,7 +294,7 @@ class Tournament(models.Model):
         tour_name_public = f"{self.episode.name_long} {self.name_long}"
         tour_name_private = tour_name_public + " (private)"
 
-        # For security by obfuscation, 
+        # For security by obfuscation,
         # and to allow easy regeneration of bracket
         key = random.randint(1000, 9999)
         # Challonge does not allow hyphens in its IDs
@@ -307,7 +307,7 @@ class Tournament(models.Model):
         # TODO proper pull
         participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
 
-        # First bracket made should be private, 
+        # First bracket made should be private,
         # to hide results and enable fixing accidents
         challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
         challonge.bulk_add_participants(tour_id_private, participants)
@@ -323,9 +323,9 @@ class Tournament(models.Model):
                 round_idx = item["attributes"]["round"]
                 if round_idx not in rounds:
                     rounds.add(round_idx)
-        
+
         # TODO check and tweak iter order in double elim
-        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx, 
+        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx,
         name=f"{tour_name_private} Round {round_idx}") for round_idx in rounds]
         print(round_objects)
         TournamentRound.objects.bulk_create(round_objects)
@@ -415,7 +415,7 @@ class TournamentRound(models.Model):
                     # Only enqueue the round if all matches are ready and open.
                     # TODO create a force-requeue, which allows for open, but not pending
                     if item["attributes"]["state"] in ('open', 'pending'):
-                        # TODO return some sort of 400 
+                        # TODO return some sort of 400
                         raise Exception
                     matches.add(item)
 
