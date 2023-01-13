@@ -6,6 +6,12 @@ from sortedm2m.fields import SortedManyToManyField
 
 from siarnaq.api.episodes.managers import EpisodeQuerySet, TournamentQuerySet
 
+# TODO is there a better import format?
+from siarnaq.api.compete.models import Match 
+from siarnaq.api.episodes import challonge
+import json
+import random
+
 logger = structlog.get_logger(__name__)
 
 
@@ -291,21 +297,23 @@ class Tournament(models.Model):
         # key = 9063
 
         # TODO rename vars in accordance with model field names
-        tour_name = "Test Tour" + key
-        tour_name_private = tour_name + "_private"
-        tour_url = f"bc_test_tour_{key}"
-        tour_url_private = f"{tour_url}_private"
+        tour_name_public = "Test Tour" + key
+        tour_name_private = tour_name_public + "_private"
+        tour_url_public = f"bc_test_tour_{key}"
+        tour_url_private = f"{tour_url_public}_private"
 
         # TODO support double
         is_single_elim = True
         # TODO proper pull
         participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
 
-        challonge.create_tour(tour_url, tour_name, True, is_single_elim)
-        challonge.bulk_add_participants(tour_url, participants)
-        challonge.start_tour(tour_url)
+        # First bracket made should be private, 
+        # to hide results and enable fixing accidents
+        challonge.create_tour(tour_url_private, tour_name_private, True, is_single_elim)
+        challonge.bulk_add_participants(tour_url_private, participants)
+        challonge.start_tour(tour_url_private)
 
-        tour = json.loads(challonge.get_tour(tour_url))
+        tour = json.loads(challonge.get_tour(tour_url_private))
         # Derive rounds
         # Takes some wrangling with API response format
         rounds = set()
@@ -315,12 +323,12 @@ class Tournament(models.Model):
                 if round_idx not in rounds:
                     rounds.add(round_idx)
         
-        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx) for round_idx in rounds]
+        round_objects = [TournamentRound(tournament=self, challonge_id=round_idx, name=f"{tour_name_private} Round {round_idx}") for round_idx in rounds]
         print(round_objects)
         TournamentRound.objects.bulk_create(round_objects)
 
         self.challonge_id_private = tour_url_private
-        self.challonge_id_public = tour_url
+        self.challonge_id_public = tour_url_public
         self.save()
 
 
@@ -388,3 +396,29 @@ class TournamentRound(models.Model):
 
     def __str__(self):
         return f"{self.tournament} ({self.name})"
+
+    def enqueue(self):
+        """TODO"""
+
+        tour = json.loads(challonge.get_tour(self.tournament.challonge_id_private))
+        # Derive matches of this round
+        matches = []
+        # kes some wrangling with API response format
+        for item in tour["included"]:
+            if item["type"] == "match":
+                round_idx = item["attributes"]["round"]
+                if round_idx == self.challonge_id:
+                    # Only enqueue the round if all matches are ready and open.
+                    # TODO create a force-requeue, which allows for open, but not pending
+                    if item["attributes"]["state"] in ('open', 'pending'):
+                        # TODO return some sort of 400 
+                        raise Exception
+                    matches.add(item)
+
+        print(len(matches))
+
+        match_objects = [Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = matches["id"]) for m in matches]
+        print(match_objects)
+        matches = Match.objects.bulk_create(match_objects)
+        matches.enqueue()
+        print(matches)

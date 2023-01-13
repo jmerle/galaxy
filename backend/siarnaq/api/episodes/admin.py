@@ -104,7 +104,7 @@ class TournamentRoundInline(admin.TabularInline):
     fields = ("name", "maps", "challonge_id", "release_status")
     ordering = ("challonge_id",)
     raw_id_fields = ("maps",)
-    readonly_fields = ("challonge_id",)
+    # readonly_fields = ("challonge_id",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("maps")
@@ -183,9 +183,16 @@ class MatchInline(admin.TabularInline):
     def has_delete_permission(self, request, obj):
         return False
 
+@admin.action(description="Create and enqueue matches of a tournament round")
+def enqueue(modeladmin, request, queryset):
+    logger.info("task_requeue", message="TODO")
+    print(queryset)
+    for round in queryset:
+        round.enqueue()
 
 @admin.register(TournamentRound)
 class TournamentRoundAdmin(admin.ModelAdmin):
+    actions = [enqueue]
     fields = (
         "name",
         "challonge_id",

@@ -117,3 +117,7 @@ class TournamentRoundViewSet(viewsets.ReadOnlyModelViewSet):
         if not self.request.user.is_staff:
             queryset = queryset.filter(tournament__is_public=True)
         return queryset
+
+    def enqueue(self):
+        # TODO have a readiness check
+        print(self)
