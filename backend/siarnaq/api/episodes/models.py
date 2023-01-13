@@ -9,6 +9,7 @@ from sortedm2m.fields import SortedManyToManyField
 
 from siarnaq.api.episodes import challonge
 from siarnaq.api.episodes.managers import EpisodeQuerySet, TournamentQuerySet
+from siarnaq.api.teams.models import Team
 
 logger = structlog.get_logger(__name__)
 
@@ -282,13 +283,23 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name_short
 
+    def get_potential_participants(self):
+        """Returns the list of participants that would be entered in this tournament,
+        if it were to start right now."""
+        # TODO incorporate real eligibility stuff
+        return (
+            Team.objects.with_active_submission()
+            .filter(episode=self.episode)
+            .all()
+            .order_by("-profile__rating__value")
+        )
+
     def initialize(self):
         """
         Seed the tournament with eligible teams in order of decreasing rating,
         populate the Challonge brackets, and create TournamentRounds.
         """
 
-        # TODO rename vars in accordance with model field names
         tour_name_public = f"{self.episode.name_long} {self.name_long}"
         tour_name_private = tour_name_public + " (private)"
 
@@ -304,13 +315,13 @@ class Tournament(models.Model):
 
         # TODO support double
         is_single_elim = True
-        # TODO proper pull
-        participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
+        participants = self.get_potential_participants()
+        participants_names = [p.name for p in participants]
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
         challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
-        challonge.bulk_add_participants(tour_id_private, participants)
+        challonge.bulk_add_participants(tour_id_private, participants_names)
         challonge.start_tour(tour_id_private)
 
         tour = json.loads(challonge.get_tour(tour_id_private))
@@ -338,6 +349,7 @@ class Tournament(models.Model):
 
         self.challonge_id_private = tour_id_private
         self.challonge_id_public = tour_id_public
+        self.in_progress = True
         self.save()
 
     def start_progress(self):
