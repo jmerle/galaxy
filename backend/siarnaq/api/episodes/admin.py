@@ -1,3 +1,4 @@
+import structlog
 from django.contrib import admin
 
 from siarnaq.api.compete.models import Match
@@ -8,6 +9,8 @@ from siarnaq.api.episodes.models import (
     Tournament,
     TournamentRound,
 )
+
+logger = structlog.get_logger(__name__)
 
 
 class MapInline(admin.TabularInline):
@@ -108,8 +111,16 @@ class TournamentRoundInline(admin.TabularInline):
         return super().get_queryset(request).prefetch_related("maps")
 
 
+@admin.action(description="Initialize a tournament")
+def initialize(modeladmin, request, queryset):
+    logger.info("initialize", message=f"Initializing tournaments in {queryset}")
+    for tour in queryset:
+        tour.initialize()
+
+
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
+    actions = [initialize]
     fieldsets = (
         (
             "General",
@@ -134,7 +145,11 @@ class TournamentAdmin(admin.ModelAdmin):
         (
             "Challonge configuration",
             {
-                "fields": ("challonge_private", "challonge_public", "in_progress"),
+                "fields": (
+                    "challonge_id_private",
+                    "challonge_id_public",
+                    "in_progress",
+                ),
             },
         ),
     )

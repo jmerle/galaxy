@@ -1,9 +1,13 @@
+import json
+import random
+
 import structlog
 from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from sortedm2m.fields import SortedManyToManyField
 
+from siarnaq.api.episodes import challonge
 from siarnaq.api.episodes.managers import EpisodeQuerySet, TournamentQuerySet
 
 logger = structlog.get_logger(__name__)
@@ -259,6 +263,14 @@ class Tournament(models.Model):
     in_progress = models.BooleanField(default=False)
     """Whether the tournament is currently being run on the Saturn compute cluster."""
 
+    challonge_id_private = models.SlugField(null=True, blank=True)
+    """The Challonge ID of the associated private bracket."""
+
+    challonge_id_public = models.SlugField(null=True, blank=True)
+    """The Challonge ID of the associated private bracket."""
+
+    # TODO drop the following two fields when ready to make incompatible migrations
+
     challonge_private = models.URLField(null=True, blank=True)
     """A private Challonge bracket showing matches in progress as they are run."""
 
@@ -270,12 +282,63 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name_short
 
-    def seed_by_scrimmage(self):
+    def initialize(self):
         """
-        Seed the tournament with eligible teamsn in order of decreasing rating, and
-        populate the Challonge brackets.
+        Seed the tournament with eligible teams in order of decreasing rating,
+        populate the Challonge brackets, and create TournamentRounds.
         """
-        raise NotImplementedError
+
+        # TODO rename vars in accordance with model field names
+        tour_name_public = f"{self.episode.name_long} {self.name_long}"
+        tour_name_private = tour_name_public + " (private)"
+
+        # For security by obfuscation,
+        # and to allow easy regeneration of bracket
+        key = random.randint(1000, 9999)
+        # Challonge does not allow hyphens in its IDs
+        # so substitute them just in case
+        tour_id_public = (f"{self.episode.name_short}_{self.name_short}_{key}").replace(
+            "-", "_"
+        )
+        tour_id_private = f"{tour_id_public}_private"
+
+        # TODO support double
+        is_single_elim = True
+        # TODO proper pull
+        participants = ["Seed" + str(i + 1) for i in range(6)]  # 1-idx
+
+        # First bracket made should be private,
+        # to hide results and enable fixing accidents
+        challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
+        challonge.bulk_add_participants(tour_id_private, participants)
+        challonge.start_tour(tour_id_private)
+
+        tour = json.loads(challonge.get_tour(tour_id_private))
+        # Derive round IDs
+        # Takes some wrangling with API response format
+        # TODO move this block to challonge.py
+        rounds = set()
+        for item in tour["included"]:
+            if item["type"] == "match":
+                round_idx = item["attributes"]["round"]
+                if round_idx not in rounds:
+                    rounds.add(round_idx)
+
+        # TODO check and tweak iter order in double elim
+        round_objects = [
+            TournamentRound(
+                tournament=self,
+                challonge_id=round_idx,
+                name=f"{tour_name_private} Round {round_idx}",
+            )
+            for round_idx in rounds
+        ]
+        print(round_objects)
+        TournamentRound.objects.bulk_create(round_objects)
+
+        self.challonge_id_private = tour_id_private
+        self.challonge_id_public = tour_id_public
+        self.save()
 
     def start_progress(self):
         """Start or resume the tournament."""
