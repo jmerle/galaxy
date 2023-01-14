@@ -27,7 +27,7 @@ def set_api_key(api_key):
     _headers["Authorization"] = api_key
 
 
-def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
+def create_tour(tournament_url, tournament_name, is_private=True, is_single_elim=True):
     tournament_type = "single elimination" if is_single_elim else "double elimination"
 
     url = f"{URL_BASE}tournaments.json"
@@ -37,10 +37,10 @@ def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
             "data": {
                 "type": "tournaments",
                 "attributes": {
-                    "name": tour_name,
+                    "name": tournament_name,
                     "tournament_type": tournament_type,
                     "private": is_private,
-                    "url": tour_url,
+                    "url": tournament_url,
                 },
             }
         }
@@ -52,8 +52,8 @@ def create_tour(tour_url, tour_name, is_private=True, is_single_elim=True):
 
 # Assumes a list of names of participants, ordered by seed,
 # better participant (ie seed #1) first.
-def bulk_add_participants(tour_url, participants):
-    url = f"{URL_BASE}tournaments/{tour_url}/participants/bulk_add.json"
+def bulk_add_participants(tournament_url, participants):
+    url = f"{URL_BASE}tournaments/{tournament_url}/participants/bulk_add.json"
 
     data = json.dumps(
         {
@@ -70,8 +70,8 @@ def bulk_add_participants(tour_url, participants):
     r.raise_for_status()
 
 
-def start_tour(tour_url):
-    url = f"{URL_BASE}tournaments/{tour_url}/change_state.json"
+def start_tour(tournament_url):
+    url = f"{URL_BASE}tournaments/{tournament_url}/change_state.json"
 
     data = json.dumps(
         {"data": {"type": "TournamentState", "attributes": {"state": "start"}}}
@@ -81,8 +81,8 @@ def start_tour(tour_url):
     r.raise_for_status()
 
 
-def get_tour(tour_url):
-    url = f"{URL_BASE}tournaments/{tour_url}.json"
+def get_tour(tournament_url):
+    url = f"{URL_BASE}tournaments/{tournament_url}.json"
 
     r = requests.get(url, headers=_headers)
     r.raise_for_status()

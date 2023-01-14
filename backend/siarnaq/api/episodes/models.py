@@ -301,18 +301,18 @@ class Tournament(models.Model):
         populate the Challonge brackets, and create TournamentRounds.
         """
 
-        tour_name_public = f"{self.episode.name_long} {self.name_long}"
-        tour_name_private = tour_name_public + " (private)"
+        tournament_name_public = f"{self.episode.name_long} {self.name_long}"
+        tournament_name_private = tournament_name_public + " (private)"
 
         # For security by obfuscation,
         # and to allow easy regeneration of bracket
         key = random.randint(1000, 9999)
         # Challonge does not allow hyphens in its IDs
         # so substitute them just in case
-        tour_id_public = (f"{self.episode.name_short}_{self.name_short}_{key}").replace(
-            "-", "_"
-        )
-        tour_id_private = f"{tour_id_public}_private"
+        tournament_id_public = (
+            f"{self.episode.name_short}_{self.name_short}_{key}"
+        ).replace("-", "_")
+        tournament_id_private = f"{tournament_id_public}_private"
 
         # TODO support double
         is_single_elim = True
@@ -331,11 +331,13 @@ class Tournament(models.Model):
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
-        challonge.create_tour(tour_id_private, tour_name_private, True, is_single_elim)
-        challonge.bulk_add_participants(tour_id_private, participants)
-        challonge.start_tour(tour_id_private)
+        challonge.create_tour(
+            tournament_id_private, tournament_name_private, True, is_single_elim
+        )
+        challonge.bulk_add_participants(tournament_id_private, participants)
+        challonge.start_tour(tournament_id_private)
 
-        tour = json.loads(challonge.get_tour(tour_id_private))
+        tour = json.loads(challonge.get_tour(tournament_id_private))
         # Derive round IDs
         # Takes some wrangling with API response format
         # TODO move this block to challonge.py
@@ -351,15 +353,15 @@ class Tournament(models.Model):
             TournamentRound(
                 tournament=self,
                 challonge_id=round_idx,
-                name=f"{tour_name_private} Round {round_idx}",
+                name=f"{tournament_name_private} Round {round_idx}",
             )
             for round_idx in rounds
         ]
         print(round_objects)
         TournamentRound.objects.bulk_create(round_objects)
 
-        self.challonge_id_private = tour_id_private
-        self.challonge_id_public = tour_id_public
+        self.challonge_id_private = tournament_id_private
+        self.challonge_id_public = tournament_id_public
         self.in_progress = True
         self.save()
 
@@ -447,7 +449,6 @@ class TournamentRound(models.Model):
                         raise Exception
                     matches.add(item)
 
-
         # quests),
         #     )
         #     matches = Match.objects.bulk_create(
@@ -481,15 +482,32 @@ class TournamentRound(models.Model):
         match_participant_objects = []
 
         for m in matches:
-            match_object = Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = m["id"])
+            match_object = Match(
+                episode=self.tournament.episode,
+                tournament_round=self,
+                maps=self.maps,
+                alternate_order=True,
+                is_ranked=False,
+                challonge_id=m["id"],
+            )
             match_participant_1_object = MatchParticipant(
-                    team_id=team_id,
-                    submission_id=team_submissions[team_id],
-                    match=match,
-                    player_index=player_index,
-                )
+                team_id=team_id,
+                submission_id=team_submissions[team_id],
+                match=match,
+                player_index=player_index,
+            )
 
-        match_objects = [Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = m["id"]) for m in matches]
+        match_objects = [
+            Match(
+                episode=self.tournament.episode,
+                tournament_round=self,
+                maps=self.maps,
+                alternate_order=True,
+                is_ranked=False,
+                challonge_id=m["id"],
+            )
+            for m in matches
+        ]
         print(match_objects)
         matches = Match.objects.bulk_create(match_objects)
         matches.enqueue()
