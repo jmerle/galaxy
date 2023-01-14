@@ -84,4 +84,4 @@ def get_tournament(tournament_url):
 
     r = requests.get(url, headers=_headers)
     r.raise_for_status()
-    return r.content
+    return r.json()

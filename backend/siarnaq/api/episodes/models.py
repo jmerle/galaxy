@@ -1,4 +1,3 @@
-import json
 import random
 
 import structlog
@@ -335,7 +334,7 @@ class Tournament(models.Model):
         challonge.bulk_add_participants(tournament_id_private, participants)
         challonge.start_tournament(tournament_id_private)
 
-        tournament = json.loads(challonge.get_tournament(tournament_id_private))
+        tournament = challonge.get_tournament(tournament_id_private)
         # Derive round IDs
         # Takes some wrangling with API response format
         # TODO move this block to challonge.py
@@ -430,9 +429,7 @@ class TournamentRound(models.Model):
         """Creates and enqueues all matches for this round.
         Fails if this round is already in progress."""
 
-        tournament = json.loads(
-            challonge.get_tournament(self.tournament.challonge_id_private)
-        )
+        tournament = challonge.get_tournament(self.tournament.challonge_id_private)
         # Derive matches of this round
         matches = []
         # kes some wrangling with API response format
