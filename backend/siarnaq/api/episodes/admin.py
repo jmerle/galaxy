@@ -114,8 +114,8 @@ class TournamentRoundInline(admin.TabularInline):
 @admin.action(description="Initialize a tournament")
 def initialize(modeladmin, request, queryset):
     logger.info("initialize", message=f"Initializing tournaments in {queryset}")
-    for tour in queryset:
-        tour.initialize()
+    for tournament in queryset:
+        tournament.initialize()
 
 
 @admin.register(Tournament)

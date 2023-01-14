@@ -26,7 +26,9 @@ def set_api_key(api_key):
     _headers["Authorization"] = api_key
 
 
-def create_tour(tournament_url, tournament_name, is_private=True, is_single_elim=True):
+def create_tournament(
+    tournament_url, tournament_name, is_private=True, is_single_elim=True
+):
     tournament_type = "single elimination" if is_single_elim else "double elimination"
 
     url = f"{URL_BASE}tournaments.json"
@@ -68,7 +70,7 @@ def bulk_add_participants(tournament_url, participants):
     r.raise_for_status()
 
 
-def start_tour(tournament_url):
+def start_tournament(tournament_url):
     url = f"{URL_BASE}tournaments/{tournament_url}/change_state.json"
 
     payload = {"data": {"type": "TournamentState", "attributes": {"state": "start"}}}
@@ -77,7 +79,7 @@ def start_tour(tournament_url):
     r.raise_for_status()
 
 
-def get_tour(tournament_url):
+def get_tournament(tournament_url):
     url = f"{URL_BASE}tournaments/{tournament_url}.json"
 
     r = requests.get(url, headers=_headers)

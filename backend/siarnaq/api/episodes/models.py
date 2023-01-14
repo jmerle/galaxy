@@ -318,8 +318,9 @@ class Tournament(models.Model):
         # Parse into a format Challonge enjoys
         # 1-idx seed
         # Store team id in misc, for convenience (re-looking up is annoying)
-        # Store tour submission in misc, for consistency and convenience
-        # Note that tour submission should never change during a tournament anyways
+        # Store tournament submission in misc, for consistency and convenience
+        # Note that tournament submission should
+        # never change during a tournament anyways
         # due to submission freeze. Bad things might happen if it does tho
         participants = [
             {"name": p.name, "seed": idx + 1, "misc": f"{p.id},{p.active_submission}"}
@@ -328,18 +329,18 @@ class Tournament(models.Model):
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
-        challonge.create_tour(
+        challonge.create_tournament(
             tournament_id_private, tournament_name_private, True, is_single_elim
         )
         challonge.bulk_add_participants(tournament_id_private, participants)
-        challonge.start_tour(tournament_id_private)
+        challonge.start_tournament(tournament_id_private)
 
-        tour = json.loads(challonge.get_tour(tournament_id_private))
+        tournament = json.loads(challonge.get_tournament(tournament_id_private))
         # Derive round IDs
         # Takes some wrangling with API response format
         # TODO move this block to challonge.py
         rounds = set()
-        for item in tour["included"]:
+        for item in tournament["included"]:
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 rounds.add(round_idx)
@@ -429,11 +430,13 @@ class TournamentRound(models.Model):
         """Creates and enqueues all matches for this round.
         Fails if this round is already in progress."""
 
-        tour = json.loads(challonge.get_tour(self.tournament.challonge_id_private))
+        tournament = json.loads(
+            challonge.get_tournament(self.tournament.challonge_id_private)
+        )
         # Derive matches of this round
         matches = []
         # kes some wrangling with API response format
-        for item in tour["included"]:
+        for item in tournament["included"]:
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 if round_idx == self.challonge_id:
