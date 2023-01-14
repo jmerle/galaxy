@@ -286,7 +286,8 @@ class Tournament(models.Model):
     def get_potential_participants(self):
         """Returns the list of participants that would be entered in this tournament,
         if it were to start right now."""
-        # TODO incorporate real eligibility stuff
+        # TODO incorporate real eligibility stuff,
+        # rebasing and using #545
         return (
             Team.objects.with_active_submission()
             .filter(episode=self.episode)
@@ -311,7 +312,8 @@ class Tournament(models.Model):
         tournament_id_public = f"{self.name_short}_{key}".replace("-", "_")
         tournament_id_private = f"{tournament_id_public}_private"
 
-        # TODO support double
+        # NOTE: We don't support double elim yet.
+        # Tracked in #548. (Also make sure to actually read the "style" field)
         is_single_elim = True
         participants = self.get_potential_participants()
         # Parse into a format Challonge enjoys
@@ -337,14 +339,17 @@ class Tournament(models.Model):
         tournament = challonge.get_tournament(tournament_id_private)
         # Derive round IDs
         # Takes some wrangling with API response format
-        # TODO move this block to challonge.py
+        # We should move this block later
+        # (to keep all code that directly hits challonge
+        # in its own module) Track in #549
         rounds = set()
         for item in tournament["included"]:
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 rounds.add(round_idx)
 
-        # TODO check and tweak iter order in double elim
+        # NOTE: rounds' order and indexes get weird in double elim.
+        # Tracked in #548
         round_objects = [
             TournamentRound(
                 tournament=self,
@@ -359,6 +364,8 @@ class Tournament(models.Model):
         self.challonge_id_private = tournament_id_private
         self.challonge_id_public = tournament_id_public
         self.in_progress = True
+        # Optimize this save w the `update_fields` kwarg
+        # Tracked in #549
         self.save()
 
     def start_progress(self):
@@ -432,16 +439,20 @@ class TournamentRound(models.Model):
         tournament = challonge.get_tournament(self.tournament.challonge_id_private)
         # Derive matches of this round
         matches = []
-        # kes some wrangling with API response format
+        # Takes some wrangling with API response format
+        # We should move this block later
+        # (to keep all code that directly hits challonge
+        # in its own module) Track in #549
         for item in tournament["included"]:
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 if round_idx == self.challonge_id:
-                    # Only enqueue the round if all matches are ready and open.
-                    # TODO create a force-requeue,
-                    # which allows for open, but not pending
-                    if item["attributes"]["state"] in ("open", "pending"):
-                        # TODO return some sort of 400
+                    # Only enqueue the round if all matches are "open".
+                    # TODO handle ability to requeue a match
+                    # TODO handle ability to requeue an entire round
+                    if item["attributes"]["state"] != "open":
+                        # TODO return some sort of 400, prob 409
+                        # rather than 500-ing
                         raise Exception
                     matches.add(item)
 
