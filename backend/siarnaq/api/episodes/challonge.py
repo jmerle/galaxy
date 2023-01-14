@@ -50,9 +50,12 @@ def create_tour(tournament_url, tournament_name, is_private=True, is_single_elim
     r.raise_for_status()
 
 
-# Assumes a list of names of participants, ordered by seed,
-# better participant (ie seed #1) first.
 def bulk_add_participants(tournament_url, participants):
+    """
+    Adds participants in bulk.
+    Expects `participants` to be formatted in the format Challonge expects.
+    Note especially that seeds must be 1-indexed.
+    """
     url = f"{URL_BASE}tournaments/{tournament_url}/participants/bulk_add.json"
 
     data = json.dumps(

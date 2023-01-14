@@ -309,9 +309,7 @@ class Tournament(models.Model):
         key = random.randint(1000, 9999)
         # Challonge does not allow hyphens in its IDs
         # so substitute them just in case
-        tournament_id_public = (
-            f"{self.episode.name_short}_{self.name_short}_{key}"
-        ).replace("-", "_")
+        tournament_id_public = f"{self.name_short}_{key}".replace("-", "_")
         tournament_id_private = f"{tournament_id_public}_private"
 
         # TODO support double
@@ -327,7 +325,6 @@ class Tournament(models.Model):
             {"name": p.name, "seed": idx + 1, "misc": f"{p.id},{p.active_submission}"}
             for (idx, p) in enumerate(participants)
         ]
-        print(participants)
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
@@ -345,8 +342,7 @@ class Tournament(models.Model):
         for item in tour["included"]:
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
-                if round_idx not in rounds:
-                    rounds.add(round_idx)
+                rounds.add(round_idx)
 
         # TODO check and tweak iter order in double elim
         round_objects = [
