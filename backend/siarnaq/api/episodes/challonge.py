@@ -3,7 +3,6 @@
 # and are instead tailored to Battlecode's specific usage,
 # to improve dev efficiency
 
-import json
 import os
 
 import requests
@@ -32,21 +31,19 @@ def create_tour(tournament_url, tournament_name, is_private=True, is_single_elim
 
     url = f"{URL_BASE}tournaments.json"
 
-    data = json.dumps(
-        {
-            "data": {
-                "type": "tournaments",
-                "attributes": {
-                    "name": tournament_name,
-                    "tournament_type": tournament_type,
-                    "private": is_private,
-                    "url": tournament_url,
-                },
-            }
+    payload = {
+        "data": {
+            "type": "tournaments",
+            "attributes": {
+                "name": tournament_name,
+                "tournament_type": tournament_type,
+                "private": is_private,
+                "url": tournament_url,
+            },
         }
-    )
+    }
 
-    r = requests.post(url, headers=_headers, data=data)
+    r = requests.post(url, headers=_headers, json=payload)
     r.raise_for_status()
 
 
@@ -58,29 +55,25 @@ def bulk_add_participants(tournament_url, participants):
     """
     url = f"{URL_BASE}tournaments/{tournament_url}/participants/bulk_add.json"
 
-    data = json.dumps(
-        {
-            "data": {
-                "type": "Participant",
-                "attributes": {
-                    "participants": participants,
-                },
-            }
+    payload = {
+        "data": {
+            "type": "Participant",
+            "attributes": {
+                "participants": participants,
+            },
         }
-    )
+    }
 
-    r = requests.post(url, headers=_headers, data=data)
+    r = requests.post(url, headers=_headers, json=payload)
     r.raise_for_status()
 
 
 def start_tour(tournament_url):
     url = f"{URL_BASE}tournaments/{tournament_url}/change_state.json"
 
-    data = json.dumps(
-        {"data": {"type": "TournamentState", "attributes": {"state": "start"}}}
-    )
+    payload = {"data": {"type": "TournamentState", "attributes": {"state": "start"}}}
 
-    r = requests.put(url, headers=_headers, data=data)
+    r = requests.put(url, headers=_headers, json=payload)
     r.raise_for_status()
 
 
