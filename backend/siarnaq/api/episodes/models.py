@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from sortedm2m.fields import SortedManyToManyField
 
+from siarnaq.api.compete.models import Match, MatchParticipant
 from siarnaq.api.episodes import challonge
 from siarnaq.api.episodes.managers import EpisodeQuerySet, TournamentQuerySet
 from siarnaq.api.teams.models import Team
@@ -445,3 +446,51 @@ class TournamentRound(models.Model):
                         # TODO return some sort of 400
                         raise Exception
                     matches.add(item)
+
+
+        # quests),
+        #     )
+        #     matches = Match.objects.bulk_create(
+        #         Match(
+        #             episode_id=request.episode_id,
+        #             alternate_order=request.determine_is_alternating(),
+        #             is_ranked=request.is_ranked,
+        #         )
+        #         for request in requests
+        #     )
+        #     MatchParticipant.objects.bulk_create(
+        #         MatchParticipant(
+        #             team_id=team_id,
+        #             submission_id=team_submissions[team_id],
+        #             match=match,
+        #             player_index=player_index,
+        #         )
+        #         for request, match in zip(requests, matches)
+        #         for player_index, team_id in enumerate(request.determine_order())
+        #     )
+        #     Match.maps.through.objects.bulk_create(
+        #         Match.maps.through(match=match, map=map_obj)
+        #         for match, request in zip(matches, requests)
+        #         for map_obj in request.maps.all()
+        #     )
+
+        # # Send them to Saturn
+        # Match.objects.filter(pk__in={match.pk for match in matches}).enqueue()
+
+        match_objects = []
+        match_participant_objects = []
+
+        for m in matches:
+            match_object = Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = m["id"])
+            match_participant_1_object = MatchParticipant(
+                    team_id=team_id,
+                    submission_id=team_submissions[team_id],
+                    match=match,
+                    player_index=player_index,
+                )
+
+        match_objects = [Match(episode = self.tournament.episode, tournament_round = self, maps = self.maps, alternate_order = True, is_ranked = False, challonge_id = m["id"]) for m in matches]
+        print(match_objects)
+        matches = Match.objects.bulk_create(match_objects)
+        matches.enqueue()
+        print(matches)
