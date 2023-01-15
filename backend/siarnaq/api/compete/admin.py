@@ -102,7 +102,6 @@ class MatchAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "episode",
-                    "tournament_round",
                     "replay",
                     "alternate_order",
                     "is_ranked",
@@ -114,6 +113,12 @@ class MatchAdmin(admin.ModelAdmin):
             "Saturn metadata",
             {
                 "fields": ("status", "created", "num_failures", "logs"),
+            },
+        ),
+        (
+            "Tournament metadata",
+            {
+                "fields": ("tournament_round", "challonge_id"),
             },
         ),
     )
@@ -128,7 +133,15 @@ class MatchAdmin(admin.ModelAdmin):
     list_filter = ("episode", "status")
     ordering = ("-pk",)
     raw_id_fields = ("tournament_round",)
-    readonly_fields = ("replay", "status", "created", "num_failures", "logs")
+    readonly_fields = (
+        "replay",
+        "status",
+        "created",
+        "num_failures",
+        "logs",
+        "tournament_round",
+        "challonge_id",
+    )
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         pk = request.resolver_match.kwargs.get("object_id", None)
