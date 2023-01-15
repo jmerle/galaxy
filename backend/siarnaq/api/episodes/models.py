@@ -440,6 +440,8 @@ class TournamentRound(models.Model):
         """Creates and enqueues all matches for this round.
         Fails if this round is already in progress."""
 
+        # TODO include an error check when maps are not set yet.
+
         tournament = challonge.get_tournament(self.tournament.challonge_id_private)
         # Derive matches of this round
         # NOTE this probably makes more sense (efficiency and consistency)
@@ -483,14 +485,6 @@ class TournamentRound(models.Model):
             )
             match_objects.append(match_object)
 
-            # NOTE these var names suck. Track in #549
-            # or maybe fix earlier if anyone has ideas
-            maps_for_match_objects_batch = [
-                Match.maps.through(match_id=match_object.pk, map_id=map_id)
-                for map_id in self.maps.all()
-            ]
-            maps_for_match_objects += maps_for_match_objects_batch
-
             # NOTE the following code is ridiculously inherent to challonge model.
             # Should probably get participants in away that's cleaner
             # tracked in #549
@@ -522,9 +516,15 @@ class TournamentRound(models.Model):
             )
             match_participant_objects.append(match_participant_2_object)
 
-        # match objects is a list!
         matches = Match.objects.bulk_create(match_objects)
+        # Can only create these objects after matches are saved,
+        # because beforehand, matches will not have a pk.
+        maps_for_match_objects = [
+            Match.maps.through(match_id=match.pk, map_id=map.pk)
+            for match in matches
+            for map in self.maps.all()
+        ]
         Match.maps.through.objects.bulk_create(maps_for_match_objects)
         MatchParticipant.objects.bulk_create(match_participant_objects)
-        print(matches)
+
         Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
