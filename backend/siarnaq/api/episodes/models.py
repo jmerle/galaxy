@@ -438,6 +438,8 @@ class TournamentRound(models.Model):
 
         tournament = challonge.get_tournament(self.tournament.challonge_id_private)
         # Derive matches of this round
+        # NOTE this probably makes more sense (efficiency and consistency)
+        # as a dict. Track in #549
         matches = []
         # Takes some wrangling with API response format
         # We should move this block later
@@ -454,68 +456,71 @@ class TournamentRound(models.Model):
                         # TODO return some sort of 400, prob 409
                         # rather than 500-ing
                         raise Exception
-                    matches.add(item)
+                    matches.append(item)
 
-        # quests),
-        #     )
-        #     matches = Match.objects.bulk_create(
-        #         Match(
-        #             episode_id=request.episode_id,
-        #             alternate_order=request.determine_is_alternating(),
-        #             is_ranked=request.is_ranked,
-        #         )
-        #         for request in requests
-        #     )
-        #     MatchParticipant.objects.bulk_create(
-        #         MatchParticipant(
-        #             team_id=team_id,
-        #             submission_id=team_submissions[team_id],
-        #             match=match,
-        #             player_index=player_index,
-        #         )
-        #         for request, match in zip(requests, matches)
-        #         for player_index, team_id in enumerate(request.determine_order())
-        #     )
-        #     Match.maps.through.objects.bulk_create(
-        #         Match.maps.through(match=match, map=map_obj)
-        #         for match, request in zip(matches, requests)
-        #         for map_obj in request.maps.all()
-        #     )
-
-        # # Send them to Saturn
-        # Match.objects.filter(pk__in={match.pk for match in matches}).enqueue()
+        # Map participant "objects" with IDs for easy lookup
+        participants = dict()
+        for item in tournament["included"]:
+            if item["type"] == "participant":
+                id = item["id"]
+                participants[id] = item
 
         match_objects = []
+        maps_for_match_objects = []
         match_participant_objects = []
 
         for m in matches:
             match_object = Match(
                 episode=self.tournament.episode,
                 tournament_round=self,
-                maps=self.maps,
                 alternate_order=True,
                 is_ranked=False,
                 challonge_id=m["id"],
             )
-            match_participant_1_object = MatchParticipant(
-                team_id=team_id,
-                submission_id=team_submissions[team_id],
-                match=match,
-                player_index=player_index,
-            )
+            match_objects.append(match_object)
 
-        match_objects = [
-            Match(
-                episode=self.tournament.episode,
-                tournament_round=self,
-                maps=self.maps,
-                alternate_order=True,
-                is_ranked=False,
-                challonge_id=m["id"],
+            # NOTE these var names suck. Track in #549
+            # or maybe fix earlier if anyone has ideas
+            maps_for_match_objects_batch = [
+                Match.maps.through(match_id=match_object.pk, map_id=map_id)
+                for map_id in self.maps.all()
+            ]
+            maps_for_match_objects += maps_for_match_objects_batch
+
+            # NOTE the following code is ridiculously inherent to challonge model.
+            # Should probably get participants in away that's cleaner
+            # tracked in #549
+            # NOTE could prob wrap this in a for loop for partipant 1 and 2
+            # tracked in #549
+            p1_id = m["relationships"]["player1"]["data"]["id"]
+            p1_misc_key = participants[p1_id]["attributes"]["misc"]
+            team_id_1, submission_id_1 = (int(_) for _ in p1_misc_key.split(","))
+            match_participant_1_object = MatchParticipant(
+                team_id=team_id_1,
+                submission_id=submission_id_1,
+                match=match_object,
+                # Note that player_index is 0-indexed.
+                # This may be tricky if you optimize code in #549.
+                player_index=0,
             )
-            for m in matches
-        ]
-        print(match_objects)
+            match_participant_objects.append(match_participant_1_object)
+
+            p2_id = m["relationships"]["player2"]["data"]["id"]
+            p2_misc_key = participants[p2_id]["attributes"]["misc"]
+            team_id_2, submission_id_2 = (int(_) for _ in p2_misc_key.split(","))
+            match_participant_2_object = MatchParticipant(
+                team_id=team_id_2,
+                submission_id=submission_id_2,
+                match=match_object,
+                # Note that player_index is 0-indexed.
+                # This may be tricky if you optimize code in #549.
+                player_index=1,
+            )
+            match_participant_objects.append(match_participant_2_object)
+
+        # match objects is a list!
         matches = Match.objects.bulk_create(match_objects)
-        matches.enqueue()
+        Match.maps.through.objects.bulk_create(maps_for_match_objects)
+        MatchParticipant.objects.bulk_create(match_participant_objects)
         print(matches)
+        Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
