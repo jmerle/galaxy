@@ -261,6 +261,7 @@ class Tournament(models.Model):
     time.
     """
 
+    # TODO drop this field when ready to make incompatible migrations
     in_progress = models.BooleanField(default=False)
     """Whether the tournament is currently being run on the Saturn compute cluster."""
 
@@ -301,11 +302,13 @@ class Tournament(models.Model):
         populate the Challonge brackets, and create TournamentRounds.
         """
 
-        tournament_name_public = f"{self.episode.name_long} {self.name_long}"
+        tournament_name_public = {self.name_long}
         tournament_name_private = tournament_name_public + " (private)"
 
         # For security by obfuscation,
         # and to allow easy regeneration of bracket
+        # In #549, use letters (even capitals!)
+        # and use more characters (altho staying under the 32-char lim).
         key = random.randint(1000, 9999)
         # Challonge does not allow hyphens in its IDs
         # so substitute them just in case
@@ -330,6 +333,9 @@ class Tournament(models.Model):
 
         # First bracket made should be private,
         # to hide results and enable fixing accidents
+        # In #549 it would be nice to have the function
+        # take in the actual TournamentStyle value,
+        # and do some true/false check there
         challonge.create_tournament(
             tournament_id_private, tournament_name_private, True, is_single_elim
         )
@@ -358,12 +364,10 @@ class Tournament(models.Model):
             )
             for round_idx in rounds
         ]
-        print(round_objects)
         TournamentRound.objects.bulk_create(round_objects)
 
         self.challonge_id_private = tournament_id_private
         self.challonge_id_public = tournament_id_public
-        self.in_progress = True
         # Optimize this save w the `update_fields` kwarg
         # Tracked in #549
         self.save()
