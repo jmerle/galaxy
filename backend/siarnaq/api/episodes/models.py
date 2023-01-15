@@ -500,6 +500,7 @@ class TournamentRound(models.Model):
                 # Note that player_index is 0-indexed.
                 # This may be tricky if you optimize code in #549.
                 player_index=0,
+                challonge_id=p1_id,
             )
             match_participant_objects.append(match_participant_1_object)
 
@@ -513,6 +514,7 @@ class TournamentRound(models.Model):
                 # Note that player_index is 0-indexed.
                 # This may be tricky if you optimize code in #549.
                 player_index=1,
+                challonge_id=p2_id,
             )
             match_participant_objects.append(match_participant_2_object)
 

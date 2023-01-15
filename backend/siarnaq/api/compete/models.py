@@ -350,6 +350,13 @@ class MatchParticipant(models.Model):
     )
     """The team's previous participation, or null if there is none."""
 
+    challonge_id = models.CharField(null=True, blank=True, max_length=64)
+    """
+    If the associated match is in Challonge,
+    Challonge's internal ID of this participant.
+    (This saves many API calls.)
+    """
+
     objects = MatchParticipantManager()
 
     def __str__(self):
