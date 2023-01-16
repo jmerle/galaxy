@@ -514,7 +514,10 @@ class TournamentRound(models.Model):
                         # Track in #549
                         # (unless people get mad at my prod/staging crashes,
                         # in which case do in this PR)
-                        raise Exception
+                        raise RuntimeError(
+                            "The bracket service does not only \
+                                have matches that are ready."
+                        )
                     matches.append(item)
 
         # Map participant "objects" with IDs for easy lookup

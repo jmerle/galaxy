@@ -1,5 +1,5 @@
 import structlog
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from siarnaq.api.compete.models import Match
 from siarnaq.api.episodes.models import (
@@ -193,7 +193,10 @@ class MatchInline(admin.TabularInline):
 def enqueue(modeladmin, request, queryset):
     logger.info("enqueue", message=f"Enqueueing tournament rounds {queryset}")
     for round in queryset:
-        round.enqueue()
+        try:
+            round.enqueue()
+        except RuntimeError as e:
+            messages.error(request, str(e))
 
 
 @admin.register(TournamentRound)
