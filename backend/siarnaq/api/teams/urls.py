@@ -5,5 +5,10 @@ from siarnaq.api.teams import views
 
 router = DefaultRouter()
 router.register(r"(?P<episode_id>[^\/.]+)/t", views.TeamViewSet, basename="team")
+router.register(
+    r"(?P<episode_id>[^\/.]+)/reference",
+    views.ReferencePlayerViewSet,
+    basename="reference",
+)
 
 urlpatterns = [path("", include(router.urls))]

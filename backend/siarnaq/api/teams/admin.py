@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export.admin import ExportMixin
 
 from siarnaq.api.compete.models import MatchParticipant, Submission
-from siarnaq.api.teams.models import Team, TeamProfile
+from siarnaq.api.teams.models import ReferencePlayer, Team, TeamProfile
 
 
 class TeamProfileInline(admin.StackedInline):
@@ -101,3 +101,15 @@ class TeamAdmin(ExportMixin, admin.ModelAdmin):
     @admin.display(ordering="profile__rating__value")
     def rating(self, obj):
         return obj.profile.rating
+
+
+@admin.register(ReferencePlayer)
+class ReferencePlayerAdmin(admin.ModelAdmin):
+    fields = ("episode", "team", "maps", "min_score")
+    filter_horizontal = ("maps",)
+    list_display = ("episode", "team", "total_maps", "min_score")
+    raw_id_fields = ("team",)
+
+    @admin.display()
+    def total_maps(self, obj):
+        return obj.maps.count()
