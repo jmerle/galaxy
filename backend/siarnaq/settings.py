@@ -320,7 +320,7 @@ class Staging(Base):
 
     GCLOUD_SERVICE_EMAIL = GALAXY_ADMIN_EMAILS[0]
     GCLOUD_LOCATION = "us-east1"
-    GCLOUD_ENABLE_ACTIONS = True
+    GCLOUD_ENABLE_ACTIONS = False
 
     GCLOUD_BUCKET_PUBLIC = "mitbattlecode-staging-public"
     GCLOUD_BUCKET_SECURE = "mitbattlecode-staging-secure"
