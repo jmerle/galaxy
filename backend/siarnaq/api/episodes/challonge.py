@@ -3,15 +3,13 @@
 # and are instead tailored to Battlecode's specific usage,
 # to improve dev efficiency
 
-import os
-
 import requests
+from django.conf import settings
 
 _headers = {
     "Accept": "application/json",
     "Authorization-Type": "v1",
-    # TODO refactor this into normal settings var etc
-    "Authorization": os.getenv("CHALLONGE_API_KEY"),
+    "Authorization": settings.CHALLONGE_API_KEY,
     "Content-Type": "application/vnd.api+json",
     # requests' default user agent causes Challonge's API to crash.
     "User-Agent": "",
