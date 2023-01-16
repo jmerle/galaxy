@@ -302,7 +302,7 @@ class Tournament(models.Model):
         populate the Challonge brackets, and create TournamentRounds.
         """
 
-        tournament_name_public = {self.name_long}
+        tournament_name_public = self.name_long
         tournament_name_private = tournament_name_public + " (private)"
 
         # For security by obfuscation,
