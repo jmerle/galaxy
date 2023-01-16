@@ -1,0 +1,536 @@
+{
+  "data": {
+    "id": "bc_test_tournament3759_private",
+    "type": "tournament",
+    "attributes": {
+      "url": "bc_test_tournament3759_private",
+      "name": "Test tournament759_private",
+      "state": "underway",
+      "private": true,
+      "description": "",
+      "gameName": "None",
+      "oauthApplicationId": "None",
+      "fullChallongeUrl": "https://challonge.com/bc_test_tournament3759_private",
+      "liveImageUrl": "https://challonge.com/bc_test_tournament3759_private.svg",
+      "signUpUrl": "None",
+      "tournamentType": "Single Elimination",
+      "notifyUponTournamentEnds": true,
+      "notifyUponMatchesOpen": true,
+      "thirdPlaceMatch": false,
+      "acceptAttachments": false,
+      "signupCap": "None",
+      "openSignup": false,
+      "checkInDuration": "None",
+      "hideSeeds": false,
+      "sequentialPairings": false,
+      "autoAssignStations": "None",
+      "onlyStartMatchesWithStations": "None",
+      "timestamps": {
+        "startsAt": "None",
+        "startedAt": "2023-01-12T05:16:25.779Z",
+        "createdAt": "2023-01-12T05:16:24.532Z",
+        "updatedAt": "2023-01-12T05:16:25.904Z",
+        "completedAt": "None"
+      }
+    },
+    "relationships": {
+      "organizer": {
+        "data": {
+          "id": "5962928",
+          "type": "user"
+        }
+      },
+      "community": {
+        "data": "None"
+      },
+      "matches": {
+        "data": [
+          {
+            "id": "303341093",
+            "type": "match"
+          },
+          {
+            "id": "303341094",
+            "type": "match"
+          },
+          {
+            "id": "303341095",
+            "type": "match"
+          },
+          {
+            "id": "303341096",
+            "type": "match"
+          },
+          {
+            "id": "303341097",
+            "type": "match"
+          }
+        ],
+        "links": {
+          "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches.json",
+          "meta": {
+            "count": 5
+          }
+        }
+      },
+      "participants": {
+        "data": [
+          {
+            "id": "191439354",
+            "type": "participant"
+          },
+          {
+            "id": "191439355",
+            "type": "participant"
+          },
+          {
+            "id": "191439356",
+            "type": "participant"
+          },
+          {
+            "id": "191439357",
+            "type": "participant"
+          },
+          {
+            "id": "191439358",
+            "type": "participant"
+          },
+          {
+            "id": "191439359",
+            "type": "participant"
+          }
+        ],
+        "links": {
+          "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants.json",
+          "meta": {
+            "count": 6
+          }
+        }
+      },
+      "stations": {
+        "data": [],
+        "links": {
+          "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/stations.json",
+          "meta": {
+            "count": 0
+          }
+        }
+      },
+      "series": {},
+      "game": {
+        "data": "None"
+      },
+      "petition": {},
+      "localizedContents": {
+        "data": []
+      }
+    },
+    "links": {
+      "self": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private.json"
+    }
+  },
+  "included": [
+    {
+      "id": "303341093",
+      "type": "match",
+      "attributes": {
+        "state": "open",
+        "round": 1,
+        "identifier": "A",
+        "scores": "0 - 0",
+        "suggestedPlayOrder": 1,
+        "scoreInSets": [],
+        "pointsByParticipant": [
+          {
+            "participantId": 191439357,
+            "scores": []
+          },
+          {
+            "participantId": 191439358,
+            "scores": []
+          }
+        ],
+        "timestamps": {
+          "startedAt": "2023-01-12T05:16:25.840Z",
+          "createdAt": "2023-01-12T05:16:25.739Z",
+          "updatedAt": "2023-01-12T05:16:25.840Z",
+          "underwayAt": "None"
+        }
+      },
+      "relationships": {
+        "player1": {
+          "data": {
+            "id": "191439357",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439357.json"
+          }
+        },
+        "player2": {
+          "data": {
+            "id": "191439358",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439358.json"
+          }
+        },
+        "attachments": {
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches/303341093/attachments.json",
+            "meta": {
+              "count": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "303341094",
+      "type": "match",
+      "attributes": {
+        "state": "open",
+        "round": 1,
+        "identifier": "B",
+        "scores": "0 - 0",
+        "suggestedPlayOrder": 2,
+        "scoreInSets": [],
+        "pointsByParticipant": [
+          {
+            "participantId": 191439356,
+            "scores": []
+          },
+          {
+            "participantId": 191439359,
+            "scores": []
+          }
+        ],
+        "timestamps": {
+          "startedAt": "2023-01-12T05:16:25.859Z",
+          "createdAt": "2023-01-12T05:16:25.748Z",
+          "updatedAt": "2023-01-12T05:16:25.859Z",
+          "underwayAt": "None"
+        }
+      },
+      "relationships": {
+        "player1": {
+          "data": {
+            "id": "191439356",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439356.json"
+          }
+        },
+        "player2": {
+          "data": {
+            "id": "191439359",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439359.json"
+          }
+        },
+        "attachments": {
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches/303341094/attachments.json",
+            "meta": {
+              "count": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "303341095",
+      "type": "match",
+      "attributes": {
+        "state": "pending",
+        "round": 2,
+        "identifier": "C",
+        "scores": "0 - 0",
+        "suggestedPlayOrder": 3,
+        "scoreInSets": [],
+        "pointsByParticipant": [
+          {
+            "participantId": 191439354,
+            "scores": []
+          },
+          {
+            "participantId": "None",
+            "scores": []
+          }
+        ],
+        "timestamps": {
+          "startedAt": "None",
+          "createdAt": "2023-01-12T05:16:25.753Z",
+          "updatedAt": "2023-01-12T05:16:25.753Z",
+          "underwayAt": "None"
+        }
+      },
+      "relationships": {
+        "player1": {
+          "data": {
+            "id": "191439354",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439354.json"
+          }
+        },
+        "attachments": {
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches/303341095/attachments.json",
+            "meta": {
+              "count": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "303341096",
+      "type": "match",
+      "attributes": {
+        "state": "pending",
+        "round": 2,
+        "identifier": "D",
+        "scores": "0 - 0",
+        "suggestedPlayOrder": 4,
+        "scoreInSets": [],
+        "pointsByParticipant": [
+          {
+            "participantId": 191439355,
+            "scores": []
+          },
+          {
+            "participantId": "None",
+            "scores": []
+          }
+        ],
+        "timestamps": {
+          "startedAt": "None",
+          "createdAt": "2023-01-12T05:16:25.764Z",
+          "updatedAt": "2023-01-12T05:16:25.764Z",
+          "underwayAt": "None"
+        }
+      },
+      "relationships": {
+        "player1": {
+          "data": {
+            "id": "191439355",
+            "type": "participant"
+          },
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/participants/191439355.json"
+          }
+        },
+        "attachments": {
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches/303341096/attachments.json",
+            "meta": {
+              "count": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "303341097",
+      "type": "match",
+      "attributes": {
+        "state": "pending",
+        "round": 3,
+        "identifier": "E",
+        "scores": "0 - 0",
+        "suggestedPlayOrder": 5,
+        "scoreInSets": [],
+        "pointsByParticipant": [
+          {
+            "participantId": "None",
+            "scores": []
+          },
+          {
+            "participantId": "None",
+            "scores": []
+          }
+        ],
+        "timestamps": {
+          "startedAt": "None",
+          "createdAt": "2023-01-12T05:16:25.771Z",
+          "updatedAt": "2023-01-12T05:16:25.771Z",
+          "underwayAt": "None"
+        }
+      },
+      "relationships": {
+        "attachments": {
+          "links": {
+            "related": "https://api.challonge.com/v2/tournaments/bc_test_tournament3759_private/matches/303341097/attachments.json",
+            "meta": {
+              "count": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "5962928",
+      "type": "user",
+      "attributes": {
+        "username": "eluxivae",
+        "imageUrl": "https://s3.amazonaws.com/challonge_app/misc/challonge_fireball_gray.png"
+      }
+    },
+    {
+      "id": "191439354",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 1,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed1",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.353Z",
+          "updatedAt": "2023-01-12T05:14:24.353Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    },
+    {
+      "id": "191439355",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 2,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed2",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.393Z",
+          "updatedAt": "2023-01-12T05:14:24.393Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    },
+    {
+      "id": "191439356",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 3,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed3",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.438Z",
+          "updatedAt": "2023-01-12T05:14:24.438Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    },
+    {
+      "id": "191439357",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 4,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed4",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.494Z",
+          "updatedAt": "2023-01-12T05:14:24.494Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    },
+    {
+      "id": "191439358",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 5,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed5",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.541Z",
+          "updatedAt": "2023-01-12T05:14:24.541Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    },
+    {
+      "id": "191439359",
+      "type": "participant",
+      "attributes": {
+        "icon": "None",
+        "seed": 6,
+        "misc": "None",
+        "username": "None",
+        "finalRank": "None",
+        "groupId": "None",
+        "tournamentId": 12410574,
+        "name": "Seed6",
+        "timestamps": {
+          "createdAt": "2023-01-12T05:14:24.584Z",
+          "updatedAt": "2023-01-12T05:14:24.584Z"
+        },
+        "states": {
+          "active": true
+        }
+      },
+      "relationships": {
+        "invitation": {},
+        "tournament": {}
+      }
+    }
+  ]
+}
