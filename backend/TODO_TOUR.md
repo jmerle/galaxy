@@ -1,3 +1,5 @@
+TODO nomerge! Or maybe turn these into docs (and then put them in a better place.)
+
 # Tournament thoughtdump
 
 ## Principles

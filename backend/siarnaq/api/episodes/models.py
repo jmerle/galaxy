@@ -350,6 +350,8 @@ class Tournament(models.Model):
         # in its own module) Track in #549
         rounds = set()
         for item in tournament["included"]:
+            # Cleaner w match-case block
+            # Track in #549
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 rounds.add(round_idx)
@@ -497,6 +499,8 @@ class TournamentRound(models.Model):
         # (to keep all code that directly hits challonge
         # in its own module) Track in #549
         for item in tournament["included"]:
+            # Much cleaner w match-case and multiple keys.
+            # Track in #549
             if item["type"] == "match":
                 round_idx = item["attributes"]["round"]
                 if round_idx == self.challonge_id:
@@ -504,14 +508,21 @@ class TournamentRound(models.Model):
                     # TODO handle ability to requeue a match
                     # TODO handle ability to requeue an entire round
                     if item["attributes"]["state"] != "open":
-                        # TODO return some sort of 400, prob 409
-                        # rather than 500-ing
+                        # For later, have this raise a more specific exception.
+                        # Then have the caller handle this return
+                        # and translate it into an HTTP response.
+                        # Track in #549
+                        # (unless people get mad at my prod/staging crashes,
+                        # in which case do in this PR)
                         raise Exception
                     matches.append(item)
 
         # Map participant "objects" with IDs for easy lookup
         participants = dict()
         for item in tournament["included"]:
+            # Cleaner with match-case,
+            # and would also allow for just one iteration over tournament, not 2.
+            # Track in #549
             if item["type"] == "participant":
                 id = item["id"]
                 participants[id] = item
@@ -563,6 +574,8 @@ class TournamentRound(models.Model):
             )
             match_participant_objects.append(match_participant_2_object)
 
+        # TODO make these creations atomic
+        # by wrapping in transaction.atomic()
         matches = Match.objects.bulk_create(match_objects)
         # Can only create these objects after matches are saved,
         # because beforehand, matches will not have a pk.
@@ -575,3 +588,5 @@ class TournamentRound(models.Model):
         MatchParticipant.objects.bulk_create(match_participant_objects)
 
         Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
+
+        # TODO return a bool on success. See above TODO about error-handling
