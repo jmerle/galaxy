@@ -7,6 +7,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 
+from siarnaq.api.compete.models import Match
 from siarnaq.api.episodes.models import Episode
 
 logger = structlog.get_logger(__name__)
@@ -82,3 +83,19 @@ def update_autoscrim_schedule(instance, update_fields, **kwargs):
     else:
         log.info("autoscrim_modify", message="Updating autoscrim schedule.")
         client.update_job(request=dict(job=job))
+
+
+@receiver(pre_save, sender=Match)
+def report_for_tournament(instance, **kwargs):
+    """
+    If a match is associated with a tournament bracket,
+    update that tournament bracket.
+    """
+
+    # TODO ensure that request (or saved match) contains scores too.
+    # Perhaps also ensure that request (or match) includes an "OK!" status.
+    if instance.challonge_id is not None:
+        # TODO not sure where the code that derives the match's tournament
+        # should live. Question of abstraction? IDK
+        # Open to suggestions
+        instance.tournament_round.tournament.report_for_tournament(instance)
