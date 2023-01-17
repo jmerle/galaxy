@@ -514,11 +514,8 @@ class TournamentRound(models.Model):
                         # For later, have this raise a more specific exception.
                         # Then have the caller handle this return
                         # and translate it into an HTTP response.
-                        # Track in #549
-                        # (unless people get mad at my prod/staging crashes,
-                        # in which case do in this PR)
                         raise RuntimeError(
-                            "The bracket service does not only \
+                            "The bracket service's round does not only\
                                 have matches that are ready."
                         )
                     matches.append(item)
