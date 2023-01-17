@@ -92,7 +92,7 @@ def report_for_tournament(instance, **kwargs):
     update that tournament bracket.
     """
 
-    # TODO ensure that request (or saved match) contains scores too.
+    # !! TODO ensure that request (or saved match) contains scores too.
     # Perhaps also ensure that request (or match) includes an "OK!" status.
     if instance.challonge_id is not None:
         # NOTE: not sure where the code that derives the match's tournament

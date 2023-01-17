@@ -261,23 +261,11 @@ class Tournament(models.Model):
     time.
     """
 
-    # TODO drop this field when ready to make incompatible migrations
-    in_progress = models.BooleanField(default=False)
-    """Whether the tournament is currently being run on the Saturn compute cluster."""
-
     challonge_id_private = models.SlugField(null=True, blank=True)
     """The Challonge ID of the associated private bracket."""
 
     challonge_id_public = models.SlugField(null=True, blank=True)
     """The Challonge ID of the associated private bracket."""
-
-    # TODO drop the following two fields when ready to make incompatible migrations
-
-    challonge_private = models.URLField(null=True, blank=True)
-    """A private Challonge bracket showing matches in progress as they are run."""
-
-    challonge_public = models.URLField(null=True, blank=True)
-    """A public Challonge bracket showing match results as they are released."""
 
     objects = TournamentQuerySet.as_manager()
 
@@ -462,8 +450,15 @@ class TournamentRound(models.Model):
     )
     """The tournament to which this round belongs."""
 
-    # TODO consider renaming this as "challonge_round_number"
-    # Should only do this when ready to run back-incompatible migrations
+    # NOTE: this is not really an "ID" in the unique sense.
+    # Instead it is more like an index.
+    # (It takes on values of ints close to 0,
+    # and two rounds from the same Challonge bracket
+    # can have the same value here of course.)
+    # You could rename this field, but that's a
+    # very widespread code change and migration,
+    # with low probability of success and
+    # high impact of failure.
     challonge_id = models.SmallIntegerField(null=True, blank=True)
     """The ID of this round as referenced by Challonge."""
 
@@ -477,6 +472,9 @@ class TournamentRound(models.Model):
         choices=ReleaseStatus.choices, default=ReleaseStatus.HIDDEN
     )
     """THe degree to which matches in this round are released."""
+
+    in_progress = models.BooleanField(default=False)
+    """Whether the round is currently being run on the Saturn compute cluster."""
 
     class Meta:
         constraints = [
@@ -492,6 +490,9 @@ class TournamentRound(models.Model):
     def enqueue(self):
         """Creates and enqueues all matches for this round.
         Fails if this round is already in progress."""
+
+        if self.in_progress:
+            raise RuntimeError("The round's matches are already running in Saturn.")
 
         num_maps = len(self.maps.all())
         # Sure, matches with even number of maps won't run.
@@ -515,7 +516,6 @@ class TournamentRound(models.Model):
                 round_idx = item["attributes"]["round"]
                 if round_idx == self.challonge_id:
                     # Only enqueue the round if all matches are "open".
-                    # TODO handle ability to requeue a match
                     # TODO handle ability to requeue an entire round
                     if item["attributes"]["state"] != "open":
                         # For later, have this raise a more specific exception.
@@ -597,3 +597,6 @@ class TournamentRound(models.Model):
             MatchParticipant.objects.bulk_create(match_participant_objects)
 
         Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
+
+        self.in_progress = True
+        self.save()

@@ -213,11 +213,13 @@ class Match(SaturnInvocation):
     replay = models.UUIDField(default=uuid.uuid4)
     """The replay file of this match."""
 
-    challonge_id = models.IntegerField(blank=True, null=True)
+    # NOTE: I'm not sure if this field _has_ to be unique.
+    # Feel free to relax it later.
+    # (Not enforcing it now, and then enforcing it later
+    # when a duplicate may have snuck in, would be hard.)
+    challonge_id = models.IntegerField(blank=True, null=True, unique=True)
     """If this match is referenced in a private Challonge bracket,
-    Challonge's id of the match in the bracket."""
-    # TODO what happens if multiple matches in siarnaq have the same challonge_id?
-    # is this scary, especially when re-doing rounds? I'll find out...
+    Challonge's internal ID of the match in the bracket."""
 
     objects = MatchQuerySet.as_manager()
 
