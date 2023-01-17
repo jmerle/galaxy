@@ -490,7 +490,11 @@ class TournamentRound(models.Model):
         """Creates and enqueues all matches for this round.
         Fails if this round is already in progress."""
 
-        # TODO include an error check when maps are not set yet.
+        num_maps = len(self.maps.all())
+        # Sure, matches with even number of maps won't run.
+        # But might as well fail fast.
+        if num_maps % 2 == 0:
+            raise RuntimeError("The round does not have an odd number of maps.")
 
         tournament = challonge.get_tournament(self.tournament.challonge_id_private)
         # Derive matches of this round
