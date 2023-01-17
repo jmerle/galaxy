@@ -95,7 +95,7 @@ def report_for_tournament(instance, **kwargs):
     # TODO ensure that request (or saved match) contains scores too.
     # Perhaps also ensure that request (or match) includes an "OK!" status.
     if instance.challonge_id is not None:
-        # TODO not sure where the code that derives the match's tournament
-        # should live. Question of abstraction? IDK
-        # Open to suggestions
+        # NOTE: not sure where the code that derives the match's tournament
+        # should live. Question of abstraction?
+        # Open to suggestions, track in #549
         instance.tournament_round.tournament.report_for_tournament(instance)

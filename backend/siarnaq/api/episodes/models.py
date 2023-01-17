@@ -421,7 +421,10 @@ class Tournament(models.Model):
             self.challonge_id_private, match.challonge_id, scores_for_challonge
         )
 
-    # TODO should we drop the following methods?
+    # Consider dropping these stubs, cuz they're bloat.
+    # We're not confident whether or not the stubs might actually be used,
+    # and someone can always remake them.
+    # track in #549.
     def start_progress(self):
         """Start or resume the tournament."""
         raise NotImplementedError
@@ -595,5 +598,3 @@ class TournamentRound(models.Model):
         MatchParticipant.objects.bulk_create(match_participant_objects)
 
         Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
-
-        # TODO return a bool on success. See above TODO about error-handling
