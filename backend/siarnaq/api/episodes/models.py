@@ -516,7 +516,12 @@ class TournamentRound(models.Model):
                 round_idx = item["attributes"]["round"]
                 if round_idx == self.challonge_id:
                     # Only enqueue the round if all matches are "open".
-                    # TODO handle ability to requeue an entire round
+                    # NOTE: it would be good to have a "force re-enqueue round",
+                    # which re-enqueues matches even if matches or round
+                    # already in progress.
+                    # This would change the following check --
+                    # matches could be open _or done_.
+                    # Track in #549
                     if item["attributes"]["state"] != "open":
                         # For later, have this raise a more specific exception.
                         # Then have the caller handle this return
