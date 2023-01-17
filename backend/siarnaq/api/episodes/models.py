@@ -2,7 +2,7 @@ import random
 
 import structlog
 from django.apps import apps
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from sortedm2m.fields import SortedManyToManyField
 
@@ -584,17 +584,16 @@ class TournamentRound(models.Model):
             )
             match_participant_objects.append(match_participant_2_object)
 
-        # TODO make these creations atomic
-        # by wrapping in transaction.atomic()
-        matches = Match.objects.bulk_create(match_objects)
-        # Can only create these objects after matches are saved,
-        # because beforehand, matches will not have a pk.
-        maps_for_match_objects = [
-            Match.maps.through(match_id=match.pk, map_id=map.pk)
-            for match in matches
-            for map in self.maps.all()
-        ]
-        Match.maps.through.objects.bulk_create(maps_for_match_objects)
-        MatchParticipant.objects.bulk_create(match_participant_objects)
+        with transaction.atomic():
+            matches = Match.objects.bulk_create(match_objects)
+            # Can only create these objects after matches are saved,
+            # because beforehand, matches will not have a pk.
+            maps_for_match_objects = [
+                Match.maps.through(match_id=match.pk, map_id=map.pk)
+                for match in matches
+                for map in self.maps.all()
+            ]
+            Match.maps.through.objects.bulk_create(maps_for_match_objects)
+            MatchParticipant.objects.bulk_create(match_participant_objects)
 
         Match.objects.filter(pk__in=[match.pk for match in matches]).enqueue()
