@@ -521,6 +521,8 @@ class TournamentRound(models.Model):
                     # already in progress.
                     # This would change the following check --
                     # matches could be open _or done_.
+                    # !!! This is also _really hard_ right now
+                    # cuz it involves match deletion which is really hard.
                     # Track in #549
                     if item["attributes"]["state"] != "open":
                         # For later, have this raise a more specific exception.
