@@ -1,6 +1,8 @@
 import uuid
 
+import google.cloud.storage as storage
 import structlog
+from django.conf import settings
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -20,6 +22,7 @@ from siarnaq.api.teams.serializers import (
     TeamJoinSerializer,
     TeamPrivateSerializer,
     TeamPublicSerializer,
+    TeamReportSerializer,
 )
 from siarnaq.gcloud import titan
 
@@ -172,4 +175,29 @@ class TeamViewSet(
             profile.save(update_fields=["has_avatar", "avatar_uuid"])
             titan.upload_image(avatar, profile.get_avatar_path())
 
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses={status.HTTP_204_NO_CONTENT: None})
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=TeamReportSerializer,
+        permission_classes=(IsAuthenticated, IsEpisodeAvailable),
+    )
+    def report(self, request, pk=None, *, episode_id):
+        """Update team strategy report"""
+        team = get_object_or_404(self.get_queryset(), members=request.user)
+        profile = team.profile
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        report = serializer.validated_data["report"]
+        client = storage.Client(credentials=settings.GCLOUD_CREDENTIALS)
+        blob = client.bucket(settings.GCLOUD_BUCKET_SECURE).blob(
+            profile.get_report_path()
+        )
+        with blob.open("wb", content_type="application/pdf") as f:
+            for chunk in report.chunks():
+                f.write(chunk)
+        titan.request_scan(blob)
         return Response(None, status=status.HTTP_204_NO_CONTENT)

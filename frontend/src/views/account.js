@@ -68,6 +68,7 @@ class Account extends Component {
       //   loaded: 0,
       // });
     }
+    // account for report upload as well
   };
 
   updateUser() {

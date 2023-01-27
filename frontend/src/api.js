@@ -320,9 +320,9 @@ class Api {
       });
   }
 
-  static avatarUpload(avatar_file, callback) {
+  static avatarUpload(report_file, callback) {
     const data = new FormData();
-    data.append("avatar", avatar_file);
+    data.append("avatar", report_file);
     return $.ajax({
       url: `${URL}/api/user/u/avatar/`,
       type: "POST",
@@ -339,9 +339,9 @@ class Api {
       });
   }
 
-  static teamAvatarUpload(avatar_file, episode, callback) {
+  static teamAvatarUpload(report_file, episode, callback) {
     const data = new FormData();
-    data.append("avatar", avatar_file);
+    data.append("avatar", report_file);
     return $.ajax({
       url: `${URL}/api/team/${episode}/t/avatar/`,
       type: "POST",
@@ -393,6 +393,25 @@ class Api {
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
+        callback(true);
+      })
+      .fail((xhr, status, error) => {
+        callback(false);
+      });
+  }
+
+  static teamReportUpload(report_file, episode, callback) {
+    const data = new FormData();
+    data.append("report", report_file);
+    return $.ajax({
+      url: `${URL}/api/team/${episode}/t/report/`,
+      type: "POST",
+      data: data,
+      dataType: "json",
+      processData: false,
+      contentType: false,
+    })
+      .done((data, status) => {
         callback(true);
       })
       .fail((xhr, status, error) => {

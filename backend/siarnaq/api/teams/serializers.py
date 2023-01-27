@@ -163,3 +163,7 @@ class TeamJoinSerializer(serializers.Serializer):
 
 class TeamAvatarSerializer(serializers.Serializer):
     avatar = serializers.ImageField(write_only=True)
+
+
+class TeamReportSerializer(serializers.Serializer):
+    report = serializers.FileField(write_only=True)
